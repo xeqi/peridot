@@ -8,9 +8,23 @@ peridot is a testing API for [ring](https://github.com/mmcgrana/ring) apps. It c
 * Maintains a cookie jar across requests
 * Set request headers to be used by all subsequent requests
 
-## Releases and Dependency Information
+## Dependency Information
 
-To be added once a release has been built.
+peridot is available from [clojars](http://clojars.org).
+
+```clojure
+[peridot/peridot "0.0.1"]
+```
+
+or to your Maven project's `pom.xml` (requires adding clojars repo):
+
+```xml
+<dependency>
+  <groupId>peridot</groupId>
+  <artifactId>peridot</artifactId>
+  <version>0.0.1</version>
+</dependency>
+```
 
 ## Example Usage
 

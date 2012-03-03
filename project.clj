@@ -1,4 +1,4 @@
-(defproject peridot "0.0.1-SNAPSHOT"
+(defproject peridot "0.0.1"
   :description "a basic api for testing ring apps"
   :dependencies [[org.clojure/clojure "1.3.0"]
                  [ring-mock "0.1.1"]
