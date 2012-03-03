@@ -38,12 +38,16 @@
             (parse-map options))]))
 
 (defn ^:private set-cookie [cookie-jar [k v]]
-  (assoc-in cookie-jar [(:domain v) k] v))
+  (assoc cookie-jar  k v))
 
 (defn merge-cookies [headers cookie-jar uri host]
-  (reduce #(set-cookie %1 (build-cookie %2 uri host))
-          cookie-jar
-          (get headers "Set-Cookie")))
+  (let [cookie-string (get headers "Set-Cookie")]
+    (if cookie-string
+      (assoc cookie-jar host
+         (reduce #(set-cookie %1 (build-cookie %2 uri host))
+                 {}
+                 cookie-string))
+      cookie-jar)))
 
 (defn cookies-for [cookie-jar scheme uri host]
   {"Cookie"

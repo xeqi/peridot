@@ -11,127 +11,119 @@
                  ["redirected"] {:get "You've been redirected"}))
 
 (deftest request-generic
-  (let [session (session app)]
-    (let [state (-> session
-                    (request "/"))]
-      (is (:request state)
-          "request returns session with :request"))
-    (let [state (-> session
-                    (request "/"))]
-      (is (= 200
-             (:status (:response state)))
-          "request returns session with :response"))
-    (let [state (-> session
-                    (request "/"))]
-      (is (= :get
-             (:request-method (:request state)))
-          "request uses :get by default"))
-    (let [state (-> session
-                    (request "/" :params {"foo" "bar"
-                                          "zoo" "car"}))]
-      (is (= (:query-string (:request state))
-             "foo=bar&zoo=car")
-          "request sends params"))
-    (let [state (-> session
-                    (request "/redirect"))]
-      (is (= 302
-             (:status (:response state)))
-          "request does not follow redirects by default"))))
+  (-> (session app)
+      (request "/")
+      (validate
+       #(is (:request %)
+            "request returns session with :request")
+       #(is (= 200
+               (:status (:response %)))
+            "request returns session with :response")
+       #(is (= :get
+               (:request-method (:request %)))
+            "request uses :get by default"))
+      (request "/" :params {"foo" "bar"
+                            "zoo" "car"})
+      (validate
+       #(is (= (:query-string (:request %))
+               "foo=bar&zoo=car")
+            "request sends params"))
+      (request "/redirect")
+      (validate
+       #(is (= 302
+               (:status (:response %)))
+            "request does not follow redirects by default"))))
 
 (deftest request-posts
-  (let [state (-> (session app)
-                  (request "/" :request-method :post))]
-    (is (= "application/x-www-form-urlencoded"
-           (:content-type (:request state)))
-        "request uses urlencoded content-type for post"))
-  (let [state (-> (session app)
-                  (request "/"
-                           :request-method :post
-                           :content-type "application/xml"))]
-    (is (= "application/xml"
-           (:content-type (:request state)))
-        "request does not override the content-type")))
+  (-> (session app)
+      (request "/" :request-method :post)
+      (validate
+       #(is (= "application/x-www-form-urlencoded"
+               (:content-type (:request %)))
+            "request uses urlencoded content-type for post"))
+      (request "/"
+               :request-method :post
+               :content-type "application/xml")
+      (validate
+       #(is (= "application/xml"
+               (:content-type (:request %)))
+            "request does not override the content-type"))))
 
 (deftest request-https
-  (let [state (-> (session app)
-                  (request "https://www.example.org"))]
-    (is (= :https
-           (:scheme (:request state)))
-        "request should set https scheme")
-    (is (= 443
-           (:server-port (:request state)))
-        "request should set https port")))
-
+  (-> (session app)
+      (request "https://www.example.org")
+      (validate
+       #(is (= :https
+               (:scheme (:request %)))
+            "request should set https scheme")
+       #(is (= 443
+               (:server-port (:request %)))
+            "request should set https port"))))
 
 (deftest header-generic
-  (let [state (-> (session app)
-                  (header "User-Agent" "Firefox")
-                  (request "/"))]
-    (is (= "Firefox"
-           ((:headers (:request state)) "user-agent"))
-        "header sets for future requests"))
-  (let [state (-> (session app)
-                  (header "User-Agent" "Firefox")
-                  (request "/")
-                  (request "/"))]
-    (is (= "Firefox"
-           ((:headers (:request state)) "user-agent"))
-        "header persists across requests"))
-  (let [state (-> (session app)
-                  (header "User-Agent" "Firefox")
-                  (header "User-Agent" "Safari")
-                  (request "/"))]
-    (is (= "Safari"
-           ((:headers (:request state)) "user-agent"))
-        "header is overwritten by later calls"))
-  (let [state (-> (session app)
-                  (header "User-Agent" "Firefox")
-                  (header "User-Agent" nil)
-                  (request "/"))]
-    (is (= nil
-           ((:headers (:request state)) "user-agent"))
-        "header can clear a value"))
-  (let [state (-> (session app)
-                  (header "User-Agent" "Firefox")
-                  (request "/" :headers {"User-Agent" "Safari"}))]
-    (is (= "Safari"
-           ((:headers (:request state)) "user-agent"))
-        "header is overwritten by the request")))
+  (-> (session app)
+      (header "User-Agent" "Firefox")
+      (request "/")
+      (validate
+       #(is (= "Firefox"
+               ((:headers (:request %)) "user-agent"))
+            "header sets for future requests"))
+      (request "/")
+      (validate
+       #(is (= "Firefox"
+               ((:headers (:request %)) "user-agent"))
+            "header persists across requests"))
+      (request "/" :headers {"User-Agent" "Safari"})
+      (validate
+       #(is (= "Safari"
+               ((:headers (:request %)) "user-agent"))
+            "header is overwritten by the request"))
+      (header "User-Agent" "Safari")
+      (request "/")
+      (validate
+       #(is (= "Safari"
+               ((:headers (:request %)) "user-agent"))
+            "header is overwritten by later calls"))
+      (header "User-Agent" nil)
+      (request "/")
+      (validate
+       #(is (= nil
+               ((:headers (:request %)) "user-agent"))
+            "header can clear a value"))))
 
 (deftest authorize-generic
-  (let [state (-> (session app)
-                  (authorize "bryan" "secret")
-                  (request "/"))]
-    (is (= "Basic YnJ5YW46c2VjcmV0\n"
-           ((:headers (:request state)) "authorization"))
-        "authorize sets the authorization header"))
-    (let [state (-> (session app)
-                    (authorize "bryan" "secret")
-                    (request "/")
-                    (request "/"))]
-    (is (= "Basic YnJ5YW46c2VjcmV0\n"
-           ((:headers (:request state)) "authorization"))
-        "authorize persists the header across requests")))
+  (-> (session app)
+      (authorize "bryan" "secret")
+      (request "/")
+      (validate
+       #(is (= "Basic YnJ5YW46c2VjcmV0\n"
+               ((:headers (:request %)) "authorization"))
+            "authorize sets the authorization header"))
+      (request "/")
+      (validate
+       #(is (= "Basic YnJ5YW46c2VjcmV0\n"
+               ((:headers (:request %)) "authorization"))
+            "authorize persists the header across requests"))))
 
 (deftest follow-redirect-generic
-  (let [state (-> (session app)
-                  (request "/redirect")
-                  (follow-redirect))]
-    (is (= 200
-           (:status (:response state)))
-        "follow redirect should follow")
-    (is (= "You've been redirected"
-           (:body (:response state)))
-        "follow redirect should have correct body")
-    (is (= "http://localhost/redirect"
-           ((:headers (:request state)) "referrer"))
-        "follow redirect should set referrer"))
-  (let [state (-> (session app)
-                  (request "/redirect" :params {"bar" "foo"})
-                  (follow-redirect))]
-
-    (is (= nil (:params (:request state)))
-        "follow redirect should not keep params")))
+  (-> (session app)
+      (request "/redirect")
+      (follow-redirect)
+      (validate
+       #(is (= 200
+               (:status (:response %)))
+            "follow redirect should follow")
+       #(is (= "You've been redirected"
+               (:body (:response %)))
+            "follow redirect should have correct body")
+       #(is (= "http://localhost/redirect"
+               ((:headers (:request %)) "referrer"))
+            "follow redirect should set referrer"))
+      (request "/redirect" :params {"bar" "foo"})
+      (follow-redirect)
+      (validate
+       #(is (= nil (:params (:request %)))
+        "follow redirect should not keep params"))))
 
 (deftest follow-redirect-errors
   (is (thrown-with-msg? Exception #"Previous response was not a redirect"

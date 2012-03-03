@@ -70,7 +70,8 @@
              :response response
              :request request
              :headers headers
-             :cookie-jar (cj/merge-cookies (:headers response) cookie-jar
+             :cookie-jar (cj/merge-cookies (:headers response)
+                                           cookie-jar
                                            (:uri request)
                                            (get-host request)))))
 
@@ -93,3 +94,8 @@
            location
            :headers {"referrer" (build-url (:request state))})
         (throw (Exception. "Previous response was not a redirect")))))
+
+(defn validate [state & fns]
+  (doseq [f fns]
+    (f state))
+  state)
