@@ -64,6 +64,10 @@ session, request, headers, authorize, follow-redirect, and dofns are the main ap
 
 Additional docs to be created later.  See tests until then.
 
+## Building
+
+`lein` version 2 is used as the build tool.
+
 ## License
 
 Copyright (C) 2012 Nelson Morris
