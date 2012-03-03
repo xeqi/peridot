@@ -30,7 +30,7 @@
   (let [[assign options] (or (string/split cookie-string #"; *" 2)
                              [cookie-string nil])
         [k v] (string/split assign #"=" 2)]
-    [(.toLowerCase k)
+    [(string/lower-case k)
      (merge {:value v}
             {:path (re-find #".*\/" uri)}
             {:domain host}

@@ -1,13 +1,11 @@
 (ns peridot.core
-  (:import java.text.SimpleDateFormat
-           java.util.Date)
   (:require [ring.mock.request :as mock]
             [peridot.cookie-jar :as cj]
             [clojure.data.codec.base64 :as base64]
             [clojure.string :as string]))
 
 (defn ^:private get-host [request]
-  (.toLowerCase (get (:headers request) "host")))
+  (string/lower-case (get (:headers request) "host")))
 
 (defn ^:private set-post-content-type [request]
   (if (and (not (:content-type request))
@@ -21,7 +19,7 @@
     request))
 
 (defn ^:private to-header-key [k]
-  (.toLowerCase (str k)))
+  (string/lower-case (str k)))
 
 (defn ^:private add-headers [request headers]
   (reduce (fn [req [k v]]
