@@ -67,29 +67,29 @@
 (deftest cookies-keep-a-cookie-jar
   (-> (session app)
       (request "/show")
-      (validate
+      (dofns
        #(is (empty? ((:headers (:request %)) "cookie"))
             "cookies should be empty for new session"))
       (request "/set" :params {"value" "1"})
       (request "/show")
-      (validate
+      (dofns
        #(is (= "value=1"
                ((:headers (:request %)) "cookie"))
             "cookies should be saved and sent back"))
       (request "/show")
-      (validate
+      (dofns
        #(is (= "value=1"
                ((:headers (:request %)) "cookie"))
             "old cookies should be saved when no cookies are send back"))
       (request "/set" :params {"VALUE" "2"})
       (request "/show")
-      (validate
+      (dofns
        #(is (= "VALUE=2"
                ((:headers (:request %)) "cookie"))
             "cookies are case insensitive"))
       (request "/delete")
       (request "/show")
-      (validate
+      (dofns
        #(is (empty?
              ((:headers (:request %)) "cookie"))
             "cookies can be deleted"))))
@@ -98,33 +98,33 @@
   (-> (session app)
       (request "http://www.example.com/set" :params {"value" "1"})
       (request "http://www.example.com/show")
-      (validate
+      (dofns
        #(is (= "value=1"
                ((:headers (:request %)) "cookie"))
             "cookies should be saved and sent back for absolute url"))
       (request "http://WWW.EXAMPLE.COM/show")
-      (validate
+      (dofns
        #(is (= "value=1"
                ((:headers (:request %)) "cookie"))
             "cookies domain should be case insensitive"))
       (request "http://www.other.example.com/show")
-      (validate
+      (dofns
        #(is (empty? ((:headers (:request %)) "cookie"))
             "cookies are not sent to other hosts"))
       (request "http://www.example.com/show")
-      (validate
+      (dofns
        #(is (= "value=1"
                ((:headers (:request %)) "cookie"))
             "cookies are sent to subdomains"))
       (request "http://example.com/set" :params {"value" "2"})
       (request "http://www.example.com/show")
-      (validate
+      (dofns
        #(is (= "value=1"
                ((:headers (:request %)) "cookie"))
             "cookies are preferred to be more specific"))
       (request "http://www.example.com/set" :params {"value" "3"})
       (request "http://www.example.com/show")
-      (validate
+      (dofns
        #(is (= "value=3"
                ((:headers (:request %)) "cookie"))
             "cookies ordering does not matter for specificity"))))
@@ -135,7 +135,7 @@
     (binding [peridot.cookie-jar/get-time (fn [] 60001)]
       (-> state
           (request "/expirable/show")
-          (validate
+          (dofns
            #(is (empty? ((:headers (:request %)) "cookie"))
                 "expired cookies should not be sent"))))))
 
@@ -143,16 +143,16 @@
   (-> (session app)
       (request "/cookies/set" :params {"value" "1"})
       (request "/cookies/get")
-      (validate
+      (dofns
        #(is (= "value=1"
                ((:headers (:request %)) "cookie"))
             "cookies without uri are sent to path up to last slash"))
       (request "/no-cookies/show")
-      (validate
+      (dofns
        #(is (empty? ((:headers (:request %)) "cookie"))
             "cookies without uri are not sent to other pages"))
       (request "/COOKIES/show")
-      (validate
+      (dofns
        #(is (empty? ((:headers (:request %)) "cookie"))
             "cookies treat path as case sensitive"))))
 
@@ -161,11 +161,11 @@
       (request "https://example.com/set-secure"
                :params {"value" "1"})
       (request "http://example.com/get")
-      (validate
+      (dofns
        #(is (empty? ((:headers (:request %)) "cookie"))
             "secure cookies are not sent to http"))
       (request "https://example.com/get")
-      (validate
+      (dofns
        #(is (= "value=1"
                ((:headers (:request %)) "cookie"))
             "secure cookies are sent")))
@@ -173,11 +173,11 @@
       (request "http://example.com/set-http-only"
                :params {"value" "1"})
       (request "https://example.com/get")
-      (validate
+      (dofns
        #(is (empty? ((:headers (:request %)) "cookie"))
             "http-only cookies are not sent to https"))
       (request "http://example.com/get")
-      (validate
+      (dofns
        #(is (= "value=1"
                ((:headers (:request %)) "cookie"))
             "http-only cookies are sent"))))

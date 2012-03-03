@@ -17,29 +17,36 @@ To be added once a release has been built.
 ```clojure
 (use '[peridot.core])
 
-(let [state (-> (session ring-app) ;Use your ring app
-                (request "/login" :request-method :post
-                                  :params {"username" "someone"
-                                           "password" "password"})
-                (follow-redirect))]
-  (= "Hi someone"
-     (:body (:response state)))
+(-> (session ring-app) ;Use your ring app
+    (request "/login" :request-method :post
+                      :params {"username" "someone"
+                               "password" "password"})
+    (follow-redirect)
+    (dofns
+     #(= "Hi someone"
+         (:body (:response state))))
+    (request "/logout")
+    (follow-redirect)
+    (dofns
+     #(= "Hi unknown person"
+         (:body (:response state)))))
+  
+(-> (session app)
+    (header "User-Agent" "Firefox")
+    (request "/")
+    (dofns
+     #(= "Firefox"
+         ((:headers (:request %)) "user-agent"))))
 
-(let [state (-> (session (constantly {})
-                (headers "User-Agent" "FireFox")
-                (request "/"))]
-  (= "Firefox"  
-     ((:headers (:request state)) "user-agent"))
-
-
-(let [state (-> (session (constantly {})
-                (authorize "bryan" "secret")
-                (request "/"))]
-  (= "Basic YnJ5YW46c2VjcmV0\n"
-     ((:headers (:request state)) "authorization")))
+(-> (session ring-app)
+    (authorize "bryan" "secret")
+    (request "/")
+    (dofns
+     #(= "Basic YnJ5YW46c2VjcmV0\n"
+         ((:headers (:request %)) "authorization"))))
 ```
 
-session, request, headers, authorize, and follow-redirect are the main api methods.  Each returns a state map with :request and :response being the ring request and response maps that were sent/recieved.
+session, request, headers, authorize, follow-redirect, and dofns are the main api methods.  Each returns a state map with :request and :response being the ring request and response maps that were sent and recieved.
 
 Additional docs to be created later.  See tests until then.
 

@@ -13,7 +13,7 @@
 (deftest request-generic
   (-> (session app)
       (request "/")
-      (validate
+      (dofns
        #(is (:request %)
             "request returns session with :request")
        #(is (= 200
@@ -24,12 +24,12 @@
             "request uses :get by default"))
       (request "/" :params {"foo" "bar"
                             "zoo" "car"})
-      (validate
+      (dofns
        #(is (= (:query-string (:request %))
                "foo=bar&zoo=car")
             "request sends params"))
       (request "/redirect")
-      (validate
+      (dofns
        #(is (= 302
                (:status (:response %)))
             "request does not follow redirects by default"))))
@@ -37,14 +37,14 @@
 (deftest request-posts
   (-> (session app)
       (request "/" :request-method :post)
-      (validate
+      (dofns
        #(is (= "application/x-www-form-urlencoded"
                (:content-type (:request %)))
             "request uses urlencoded content-type for post"))
       (request "/"
                :request-method :post
                :content-type "application/xml")
-      (validate
+      (dofns
        #(is (= "application/xml"
                (:content-type (:request %)))
             "request does not override the content-type"))))
@@ -52,7 +52,7 @@
 (deftest request-https
   (-> (session app)
       (request "https://www.example.org")
-      (validate
+      (dofns
        #(is (= :https
                (:scheme (:request %)))
             "request should set https scheme")
@@ -64,29 +64,29 @@
   (-> (session app)
       (header "User-Agent" "Firefox")
       (request "/")
-      (validate
+      (dofns
        #(is (= "Firefox"
                ((:headers (:request %)) "user-agent"))
             "header sets for future requests"))
       (request "/")
-      (validate
+      (dofns
        #(is (= "Firefox"
                ((:headers (:request %)) "user-agent"))
             "header persists across requests"))
       (request "/" :headers {"User-Agent" "Safari"})
-      (validate
+      (dofns
        #(is (= "Safari"
                ((:headers (:request %)) "user-agent"))
             "header is overwritten by the request"))
       (header "User-Agent" "Safari")
       (request "/")
-      (validate
+      (dofns
        #(is (= "Safari"
                ((:headers (:request %)) "user-agent"))
             "header is overwritten by later calls"))
       (header "User-Agent" nil)
       (request "/")
-      (validate
+      (dofns
        #(is (= nil
                ((:headers (:request %)) "user-agent"))
             "header can clear a value"))))
@@ -95,12 +95,12 @@
   (-> (session app)
       (authorize "bryan" "secret")
       (request "/")
-      (validate
+      (dofns
        #(is (= "Basic YnJ5YW46c2VjcmV0\n"
                ((:headers (:request %)) "authorization"))
             "authorize sets the authorization header"))
       (request "/")
-      (validate
+      (dofns
        #(is (= "Basic YnJ5YW46c2VjcmV0\n"
                ((:headers (:request %)) "authorization"))
             "authorize persists the header across requests"))))
@@ -109,7 +109,7 @@
   (-> (session app)
       (request "/redirect")
       (follow-redirect)
-      (validate
+      (dofns
        #(is (= 200
                (:status (:response %)))
             "follow redirect should follow")
@@ -121,7 +121,7 @@
             "follow redirect should set referrer"))
       (request "/redirect" :params {"bar" "foo"})
       (follow-redirect)
-      (validate
+      (dofns
        #(is (= nil (:params (:request %)))
         "follow redirect should not keep params"))))
 

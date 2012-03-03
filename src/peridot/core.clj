@@ -95,7 +95,7 @@
            :headers {"referrer" (build-url (:request state))})
         (throw (Exception. "Previous response was not a redirect")))))
 
-(defn validate [state & fns]
+(defn dofns [state & fns]
   (doseq [f fns]
     (f state))
   state)
