@@ -1,6 +1,6 @@
-(ns ring-test.test.cookies
+(ns peridot.test.cookies
   (:import java.util.Date)
-  (:use [ring-test]
+  (:use [peridot.core]
         [clojure.test])
   (:require [net.cgrand.moustache :as moustache]
             [ring.util.response :as response]

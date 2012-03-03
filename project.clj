@@ -1,5 +1,5 @@
-(defproject ring-test "0.0.1-SNAPSHOT"
-  :description "FIXME: write description"
+(defproject peridot "0.0.1-SNAPSHOT"
+  :description "a basic api for testing ring apps"
   :dependencies [[org.clojure/clojure "1.3.0"]
                  [ring-mock "0.1.1"]
                  [org.clojure/data.codec "0.1.0"]]

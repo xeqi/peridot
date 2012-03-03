@@ -1,5 +1,5 @@
-(ns ring-test.test.core
-  (:use [ring-test]
+(ns peridot.test.core
+  (:use [peridot.core]
         [clojure.test])
   (:require [net.cgrand.moustache :as moustache]
             [ring.util.response :as response]))

@@ -1,6 +1,6 @@
-# ring-test
+# peridot
 
-ring-test is a small, simple testing API for [ring](https://github.com/mmcgrana/ring) apps. It can be used on its own or as a reusable starting point for Web frameworks and testing libraries to build on. Its initial functionality is based on a port of [Rack::Test](https://github.com/brynary/rack-test)'s test suite.
+peridot is a testing API for [ring](https://github.com/mmcgrana/ring) apps. It can be used on its own or as a reusable starting point for Web frameworks and testing libraries to build on. Its initial functionality is based on an incomplete port of [Rack::Test](https://github.com/brynary/rack-test)'s test suite.
 
 ## Features
 
@@ -15,7 +15,7 @@ To be added once a release has been built.
 ## Example Usage
 
 ```clojure
-(use '[ring-test])
+(use '[peridot.core])
 
 (let [state (-> (session ring-app) ;Use your ring app
                 (request "/login" :request-method :post

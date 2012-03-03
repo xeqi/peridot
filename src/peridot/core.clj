@@ -1,4 +1,4 @@
-(ns ring-test
+(ns peridot.core
   (:import java.text.SimpleDateFormat
            java.util.Date)
   (:require [ring.mock.request :as mock]
