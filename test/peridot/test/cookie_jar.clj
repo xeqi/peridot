@@ -1,4 +1,4 @@
-(ns peridot.test.cookies
+(ns peridot.test.cookie-jar
   (:import java.util.Date)
   (:use [peridot.core]
         [clojure.test])
@@ -17,16 +17,22 @@
   (params/wrap-params
    (cookies/wrap-cookies
     (moustache/app
-     ["set"]
+     ["expireable" "set"]
      {:get (fn [req]
              (assoc (response/response "ok")
                :cookies
                (cookies-from-map (:params req)
                                  (fn [k v]
                                    {:expires
-                                    (.format cookie-date-format
+                                    (.format peridot.cookie-jar/cookie-date-format
                                              (Date. 60000))}))))}
      ["cookies" "set"]
+     {:get (fn [req]
+             (assoc (response/response "ok")
+               :cookies
+               (cookies-from-map (:params req)
+                                 (constantly {}))))}
+     ["set"]
      {:get (fn [req]
              (assoc (response/response "ok")
                :cookies
@@ -55,50 +61,49 @@
                  resp)))}))))
 
 (deftest cookies-keep-a-cookie-jar
-  (binding [get-time (constantly 0)]
-    (let [state (-> (session app)
-                    (request "/show"))]
-      (is (empty? ((:headers (:request state)) "cookie"))
-          "cookies should be empty for new session"))
-    (let [state (-> (session app)
-                    (request "/set" :params {"value" "1"})
-                    (request "/show"))]
-      (is (= "value=1"
-             ((:headers (:request state)) "cookie"))
-          "cookies should be saved and sent back"))
-    (let [state (-> (session app)
-                    (request "/set" :params {"value" "1"})
-                    (request "/show")
-                    (request "/show"))]
-      (is (= "value=1"
-             ((:headers (:request state)) "cookie"))
-          "old cookies should be saved when no cookies are send back"))
-    (let [state (-> (session app)
-                    (request "http://www.example.com/set" :params {"value" "1"})
-                    (request "http://www.example.com/show"))]
-      (is (= "value=1"
-             ((:headers (:request state)) "cookie"))
-          "cookies should be saved and sent back for absolute url"))
-    (let [state (-> (session app)
-                    (request "http://www.example.com/set" :params {"value" "1"})
-                    (request "http://WWW.EXAMPLE.COM/show"))]
-      (is (= "value=1"
-             ((:headers (:request state)) "cookie"))
-          "cookies domain should be case insensitive"))
-    (let [state (-> (session app)
-                    (request "/set" :params {"value" "1"})
-                    (request "/set" :params {"VALUE" "2"})
-                    (request "/show"))]
-      (is (= "VALUE=2"
-             ((:headers (:request state)) "cookie"))
-          "cookies names should be case insensitive"))))
+  (let [state (-> (session app)
+                  (request "/show"))]
+    (is (empty? ((:headers (:request state)) "cookie"))
+        "cookies should be empty for new session"))
+  (let [state (-> (session app)
+                  (request "/set" :params {"value" "1"})
+                  (request "/show"))]
+    (is (= "value=1"
+           ((:headers (:request state)) "cookie"))
+        "cookies should be saved and sent back"))
+  (let [state (-> (session app)
+                  (request "/set" :params {"value" "1"})
+                  (request "/show")
+                  (request "/show"))]
+    (is (= "value=1"
+           ((:headers (:request state)) "cookie"))
+        "old cookies should be saved when no cookies are send back"))
+  (let [state (-> (session app)
+                  (request "http://www.example.com/set" :params {"value" "1"})
+                  (request "http://www.example.com/show"))]
+    (is (= "value=1"
+           ((:headers (:request state)) "cookie"))
+        "cookies should be saved and sent back for absolute url"))
+  (let [state (-> (session app)
+                  (request "http://www.example.com/set" :params {"value" "1"})
+                  (request "http://WWW.EXAMPLE.COM/show"))]
+    (is (= "value=1"
+           ((:headers (:request state)) "cookie"))
+        "cookies domain should be case insensitive"))
+  (let [state (-> (session app)
+                  (request "/set" :params {"value" "1"})
+                  (request "/set" :params {"VALUE" "2"})
+                  (request "/show"))]
+    (is (= "VALUE=2"
+           ((:headers (:request state)) "cookie"))
+        "cookies names should be case insensitive")))
 
 (deftest cookie-expires
   (let [state (-> (session app)
-                  (request "/set" :params {"value" "1"}))]
-    (binding [get-time (fn [] 60001)]
+                  (request "/expirable/set" :params {"value" "1"}))]
+    (binding [peridot.cookie-jar/get-time (fn [] 60001)]
       (let [state (-> state
-                      (request "/show"))]
+                      (request "/expirable/show"))]
         (is (empty? ((:headers (:request state)) "cookie"))
             "expired cookies should not be sent")))))
 
@@ -113,32 +118,31 @@
                     (request "/no-cookies/show"))]
       (is (empty? ((:headers (:request state)) "cookie"))
           "cookies without uri are not sent to other pages")))
-  (binding [get-time (constantly 0)]
-    (let [state (-> (session app)
-                    (request "http://www.example.com/set" :params {"value" "1"})
-                    (request "http://www.other.example.com/show"))]
-      (is (empty? ((:headers (:request state)) "cookie"))
-          "cookies are not sent to other hosts"))
-    (let [state (-> (session app)
-                    (request "http://example.com/set" :params {"value" "1"})
-                    (request "http://www.example.com/show"))]
-      (is (= "value=1"
-             ((:headers (:request state)) "cookie"))
-          "cookies are sent to subdomains"))
-    (let [state (-> (session app)
-                    (request "http://example.com/set" :params {"value" "1"})
-                    (request "http://www.example.com/set" :params {"value" "2"})
-                    (request "http://www.example.com/show"))]
-      (is (= "value=2"
-             ((:headers (:request state)) "cookie"))
-          "cookies are preferred to be more specific"))
-    (let [state (-> (session app)
-                    (request "http://www.example.com/set" :params {"value" "2"})
-                    (request "http://example.com/set" :params {"value" "1"})
-                    (request "http://www.example.com/show"))]
-      (is (= "value=2"
-             ((:headers (:request state)) "cookie"))
-          "cookies ordering does not matter for specificity")))
+  (let [state (-> (session app)
+                  (request "http://www.example.com/set" :params {"value" "1"})
+                  (request "http://www.other.example.com/show"))]
+    (is (empty? ((:headers (:request state)) "cookie"))
+        "cookies are not sent to other hosts"))
+  (let [state (-> (session app)
+                  (request "http://example.com/set" :params {"value" "1"})
+                  (request "http://www.example.com/show"))]
+    (is (= "value=1"
+           ((:headers (:request state)) "cookie"))
+        "cookies are sent to subdomains"))
+  (let [state (-> (session app)
+                  (request "http://example.com/set" :params {"value" "1"})
+                  (request "http://www.example.com/set" :params {"value" "2"})
+                  (request "http://www.example.com/show"))]
+    (is (= "value=2"
+           ((:headers (:request state)) "cookie"))
+        "cookies are preferred to be more specific"))
+  (let [state (-> (session app)
+                  (request "http://www.example.com/set" :params {"value" "2"})
+                  (request "http://example.com/set" :params {"value" "1"})
+                  (request "http://www.example.com/show"))]
+    (is (= "value=2"
+           ((:headers (:request state)) "cookie"))
+        "cookies ordering does not matter for specificity"))
   (let [state (-> (session app)
                   (request "/cookies/set" :params {"value" "1"})
                   (request "/COOKIES/show"))]
