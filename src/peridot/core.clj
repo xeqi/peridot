@@ -34,7 +34,7 @@
           request
           env))
 
-(defn ^:private build-request [uri env headers cookie-jar]
+(defn ^:private build-request [uri env headers cookie-jar content-type]
   (let [env (apply hash-map env)
         params (:params env)
         request (mock/request :get uri params)]
@@ -45,6 +45,7 @@
                                                 (:uri request)
                                                 (get-host request)))
                          (merge (:headers env))))
+        (assoc :content-type content-type)
         (add-env (dissoc (dissoc env :params) :headers))
         set-post-content-type
         set-https-port)))
@@ -63,13 +64,14 @@
   (assoc (apply hash-map params)
     :app app))
 
-(defn request [{:keys [app headers cookie-jar]} uri & env]
-  (let [request (build-request uri env headers cookie-jar)
+(defn request [{:keys [app headers cookie-jar content-type]} uri & env]
+  (let [request (build-request uri env headers cookie-jar content-type)
         response (app request)]
     (session app
              :response response
              :request request
              :headers headers
+             :content-type content-type
              :cookie-jar (cj/merge-cookies (:headers response)
                                            cookie-jar
                                            (:uri request)
@@ -77,6 +79,9 @@
 
 (defn header [state key value]
   (assoc-in state [:headers key] value))
+
+(defn content-type [state value]
+  (assoc state :content-type value))
 
 (defn authorize [state user pass]
   (header state "authorization" (str "Basic "

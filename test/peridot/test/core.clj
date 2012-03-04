@@ -133,3 +133,34 @@
   (is (thrown-with-msg? Exception #"Previous response was not a redirect"
         (-> (session app)
             (follow-redirect)))))
+
+(deftest setting-content-type
+  (-> (session app)
+      (content-type "application/json")
+      (request "/")
+      (dofns
+       #(is (= "application/json"
+               (:content-type (:request %)))
+            "content-type sets for future requests"))
+      (request "/")
+      (dofns
+       #(is (= "application/json"
+               (:content-type (:request %)))
+            "content-type persists across requests"))
+      (request "/" :content-type "application/xml")
+      (dofns
+       #(is (= "application/xml"
+               (:content-type (:request %)))
+            "content-type is overwritten by the request"))
+      (content-type "text/plain")
+      (request "/")
+      (dofns
+       #(is (= "text/plain"
+               (:content-type (:request %)))
+            "content-type is overwritten by later calls"))
+      (content-type nil)
+      (request "/")
+      (dofns
+       #(is (= nil
+               (:content-type (:request %)))
+            "content-type can clear a value"))))
