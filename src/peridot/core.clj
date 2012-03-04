@@ -60,11 +60,15 @@
        uri
        query-string))
 
-(defn session [app & params]
+(defn session
+  "Creates an initial state for passing through the api."
+  [app & params]
   (assoc (apply hash-map params)
     :app app))
 
-(defn request [{:keys [app headers cookie-jar content-type]} uri & env]
+(defn request
+  "Send a request to the ring app, returns state containing :response and :request sent to and returned from the ring app."
+  [{:keys [app headers cookie-jar content-type]} uri & env]
   (let [request (build-request uri env headers cookie-jar content-type)
         response (app request)]
     (session app
@@ -77,13 +81,19 @@
                                            (:uri request)
                                            (get-host request)))))
 
-(defn header [state key value]
+(defn header
+  "Set headers to be sent for future requests."
+  [state key value]
   (assoc-in state [:headers key] value))
 
-(defn content-type [state value]
+(defn content-type
+  "Set content-type to be sent for future requests."
+  [state value]
   (assoc state :content-type value))
 
-(defn authorize [state user pass]
+(defn authorize
+  "Set basic autorization to be used in future requests."
+  [state user pass]
   (header state "authorization" (str "Basic "
                                      (String. (base64/encode
                                                (.getBytes (str user ":" pass)
@@ -91,7 +101,9 @@
                                               "UTF-8")
                                      "\n")))
 
-(defn follow-redirect [state]
+(defn follow-redirect
+  "Follow the redirect from the previous response."
+  [state]
   (let [headers (:headers (:response state))
         location (when headers (headers "Location"))]
     (if location
@@ -100,7 +112,9 @@
            :headers {"referrer" (build-url (:request state))})
         (throw (Exception. "Previous response was not a redirect")))))
 
-(defn dofns [state & fns]
+(defn dofns
+  "An equivalent to doto that takes functions.  Returns the original state.  Useful for side-effects such as #(is (not (empty (:body %)."
+  [state & fns]
   (doseq [f fns]
     (f state))
   state)
