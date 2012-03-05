@@ -1,4 +1,5 @@
 (ns peridot.core
+  (:use clojure.test)
   (:require [ring.mock.request :as mock]
             [peridot.cookie-jar :as cj]
             [clojure.data.codec.base64 :as base64]
@@ -112,9 +113,36 @@
            :headers {"referrer" (build-url (:request state))})
         (throw (Exception. "Previous response was not a redirect")))))
 
-(defn dofns
-  "An equivalent to doto that takes functions.  Returns the original state.  Useful for side-effects such as #(is (not (empty (:body %)."
-  [state & fns]
-  (doseq [f fns]
-    (f state))
-  state)
+(defmethod assert-expr 'in [msg form]
+  `(let [state# ~(nth form 1)
+         keys# ~(nth form 2)
+         expected#  ~(nth form 3)
+         actual# (get-in state# keys#)]
+     (do-report {:type (if (= expected# actual#)
+                         :pass
+                         :fail)
+                 :message ~msg
+                 :expected (cons (first '~form)
+                                 (rest (rest '~form)))
+                 :actual actual#})
+     state#))
+
+(defmethod assert-expr 'inf [msg form]
+  `(let [state# ~(nth form 1)
+         keys# ~(nth form 2)
+         expected#  ~(nth form 3)
+         actual# (get-in state# keys#)]
+     (do-report {:type (if (expected# actual#)
+                         :pass
+                         :fail)
+                 :message ~msg
+                 :expected (cons (first '~form)
+                                 (rest (rest '~form)))
+                 :actual actual#})
+     state#))
+
+(defmacro has
+  ([state form msg]
+     `(is (~(first form)
+           ~state
+           ~@(rest form)) ~msg)))

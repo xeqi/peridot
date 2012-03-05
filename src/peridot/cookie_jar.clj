@@ -50,22 +50,27 @@
       cookie-jar)))
 
 (defn cookies-for [cookie-jar scheme uri host]
-  {"Cookie"
-   (->> cookie-jar
-        (remove (fn [[domain _]]
-                  (not (re-find (re-pattern (str "\\.?" domain "$"))
-                                host))))
-        (sort-by (comp count first))
-        (map second)
-        (apply merge)
-        (map second)
-        (remove #(when-let [expires (:expires %)]
-                   (.after (Date. (get-time))
-                           (.parse cookie-date-format
-                                   expires))))
-        (remove #(not (re-find (re-pattern (str "^" (:path %) "[^/]*$")) uri)))
-        (remove (scheme {:http  :secure
-                         :https :http-only}))
-        (map :raw)
-        (interpose ";")
-        (apply str))})
+  (let [cookie-string
+        (->> cookie-jar
+             (remove (fn [[domain _]]
+                       (not (re-find (re-pattern (str "\\.?" domain "$"))
+                                     host))))
+             (sort-by (comp count first))
+             (map second)
+             (apply merge)
+             (map second)
+             (remove #(when-let [expires (:expires %)]
+                        (.after (Date. (get-time))
+                                (.parse cookie-date-format
+                                        expires))))
+             (remove #(not (re-find (re-pattern (str "^"
+                                                     (:path %)
+                                                     "[^/]*$"))
+                                    uri)))
+             (remove (scheme {:http  :secure
+                              :https :http-only}))
+             (map :raw)
+             (interpose ";")
+             (apply str))]
+    (when (not (empty? cookie-string))
+      {"Cookie" cookie-string})))

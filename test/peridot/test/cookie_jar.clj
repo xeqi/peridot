@@ -67,67 +67,47 @@
 (deftest cookies-keep-a-cookie-jar
   (-> (session app)
       (request "/show")
-      (dofns
-       #(is (empty? ((:headers (:request %)) "cookie"))
-            "cookies should be empty for new session"))
+      (has (in [:request :headers "cookie"] nil)
+           "cookies should be empty for new session")
       (request "/set" :params {"value" "1"})
       (request "/show")
-      (dofns
-       #(is (= "value=1"
-               ((:headers (:request %)) "cookie"))
-            "cookies should be saved and sent back"))
+      (has (in [:request :headers "cookie"] "value=1")
+           "cookies should be saved and sent back")
       (request "/show")
-      (dofns
-       #(is (= "value=1"
-               ((:headers (:request %)) "cookie"))
-            "old cookies should be saved when no cookies are send back"))
+      (has (in [:request :headers "cookie"] "value=1")
+           "old cookies should be saved when no cookies are send back")
       (request "/set" :params {"VALUE" "2"})
       (request "/show")
-      (dofns
-       #(is (= "VALUE=2"
-               ((:headers (:request %)) "cookie"))
-            "cookies are case insensitive"))
+      (has (in [:request :headers "cookie"] "VALUE=2")
+           "cookies are case insensitive")
       (request "/delete")
       (request "/show")
-      (dofns
-       #(is (empty?
-             ((:headers (:request %)) "cookie"))
-            "cookies can be deleted"))))
+      (has (in [:request :headers "cookie"] nil)
+           "cookies can be deleted")))
 
 (deftest cookies-for-absolute-url
   (-> (session app)
       (request "http://www.example.com/set" :params {"value" "1"})
       (request "http://www.example.com/show")
-      (dofns
-       #(is (= "value=1"
-               ((:headers (:request %)) "cookie"))
-            "cookies should be saved and sent back for absolute url"))
+      (has (in [:request :headers "cookie"] "value=1")
+           "cookies should be saved and sent back for absolute url")
       (request "http://WWW.EXAMPLE.COM/show")
-      (dofns
-       #(is (= "value=1"
-               ((:headers (:request %)) "cookie"))
-            "cookies domain should be case insensitive"))
+      (has (in [:request :headers "cookie"] "value=1")
+           "cookies domain should be case insensitive")
       (request "http://www.other.example.com/show")
-      (dofns
-       #(is (empty? ((:headers (:request %)) "cookie"))
-            "cookies are not sent to other hosts"))
+      (has (in [:request :headers "cookie"] nil)
+           "cookies are not sent to other hosts")
       (request "http://www.example.com/show")
-      (dofns
-       #(is (= "value=1"
-               ((:headers (:request %)) "cookie"))
-            "cookies are sent to subdomains"))
+      (has (in [:request :headers "cookie"] "value=1")
+           "cookies are sent to subdomains")
       (request "http://example.com/set" :params {"value" "2"})
       (request "http://www.example.com/show")
-      (dofns
-       #(is (= "value=1"
-               ((:headers (:request %)) "cookie"))
-            "cookies are preferred to be more specific"))
+      (has (in [:request :headers "cookie"] "value=1")
+           "cookies are preferred to be more specific")
       (request "http://www.example.com/set" :params {"value" "3"})
       (request "http://www.example.com/show")
-      (dofns
-       #(is (= "value=3"
-               ((:headers (:request %)) "cookie"))
-            "cookies ordering does not matter for specificity"))))
+      (has (in [:request :headers "cookie"] "value=3")
+           "cookies ordering does not matter for specificity")))
 
 (deftest cookie-expires
   (let [state (-> (session app)
@@ -135,49 +115,38 @@
     (binding [peridot.cookie-jar/get-time (fn [] 60001)]
       (-> state
           (request "/expirable/show")
-          (dofns
-           #(is (empty? ((:headers (:request %)) "cookie"))
-                "expired cookies should not be sent"))))))
+          (has (in [:request :headers "cookie"] nil)
+               "expired cookies should not be sent")))))
 
 (deftest cookies-uri
   (-> (session app)
       (request "/cookies/set" :params {"value" "1"})
       (request "/cookies/get")
-      (dofns
-       #(is (= "value=1"
-               ((:headers (:request %)) "cookie"))
-            "cookies without uri are sent to path up to last slash"))
+      (has (in [:request :headers "cookie"] "value=1")
+           "cookies without uri are sent to path up to last slash")
       (request "/no-cookies/show")
-      (dofns
-       #(is (empty? ((:headers (:request %)) "cookie"))
-            "cookies without uri are not sent to other pages"))
+      (has (in [:request :headers "cookie"] nil)
+           "cookies without uri are not sent to other pages")
       (request "/COOKIES/show")
-      (dofns
-       #(is (empty? ((:headers (:request %)) "cookie"))
-            "cookies treat path as case sensitive"))))
+      (has (in [:request :headers "cookie"] nil)
+           "cookies treat path as case sensitive")))
 
 (deftest cookie-security
   (-> (session app)
       (request "https://example.com/set-secure"
                :params {"value" "1"})
       (request "http://example.com/get")
-      (dofns
-       #(is (empty? ((:headers (:request %)) "cookie"))
-            "secure cookies are not sent to http"))
+      (has (in [:request :headers "cookie"] nil)
+           "secure cookies are not sent to http")
       (request "https://example.com/get")
-      (dofns
-       #(is (= "value=1"
-               ((:headers (:request %)) "cookie"))
-            "secure cookies are sent")))
+      (has (in [:request :headers "cookie"] "value=1")
+           "secure cookies are sent"))
   (-> (session app)
       (request "http://example.com/set-http-only"
                :params {"value" "1"})
       (request "https://example.com/get")
-      (dofns
-       #(is (empty? ((:headers (:request %)) "cookie"))
-            "http-only cookies are not sent to https"))
+      (has (in [:request :headers "cookie"] nil)
+           "http-only cookies are not sent to https")
       (request "http://example.com/get")
-      (dofns
-       #(is (= "value=1"
-               ((:headers (:request %)) "cookie"))
-            "http-only cookies are sent"))))
+      (has (in [:request :headers "cookie"] "value=1")
+           "http-only cookies are sent")))
