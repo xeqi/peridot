@@ -13,7 +13,7 @@ peridot is a testing API for [ring](https://github.com/mmcgrana/ring) apps. It c
 peridot is available from [clojars](http://clojars.org).
 
 ```clojure
-[peridot/peridot "0.0.1"]
+[peridot/peridot "0.0.2"]
 ```
 
 or to your Maven project's `pom.xml` (requires adding clojars repo):
@@ -22,7 +22,7 @@ or to your Maven project's `pom.xml` (requires adding clojars repo):
 <dependency>
   <groupId>peridot</groupId>
   <artifactId>peridot</artifactId>
-  <version>0.0.1</version>
+  <version>0.0.2</version>
 </dependency>
 ```
 
