@@ -36,31 +36,23 @@ or to your Maven project's `pom.xml` (requires adding clojars repo):
                       :params {"username" "someone"
                                "password" "password"})
     (follow-redirect)
-    (dofns
-     #(= "Hi someone"
-         (:body (:response state))))
+    (has (in [:response :body] "Hi someone"))
     (request "/logout")
     (follow-redirect)
-    (dofns
-     #(= "Hi unknown person"
-         (:body (:response state)))))
+    (has (in [:response :body] "Hi unknown person")))
   
 (-> (session app)
     (header "User-Agent" "Firefox")
     (request "/")
-    (dofns
-     #(= "Firefox"
-         ((:headers (:request %)) "user-agent"))))
+    (has (in [:request :headers "user-agent"] "Firefox")))
 
 (-> (session ring-app)
     (authorize "bryan" "secret")
     (request "/")
-    (dofns
-     #(= "Basic YnJ5YW46c2VjcmV0\n"
-         ((:headers (:request %)) "authorization"))))
+    (has (in [:request :headers "authorization"] "Basic YnJ5YW46c2VjcmV0\n")))
 ```
 
-session, request, headers, authorize, follow-redirect, and dofns are the main api methods.  Each returns a state map with :request and :response being the ring request and response maps that were sent and recieved.
+session, request, headers, authorize, follow-redirect, and (has (in..)) are the main api methods.  Each returns a state map with :request and :response being the ring request and response maps that were sent and recieved.
 
 Additional docs to be created later.  See tests until then.
 
