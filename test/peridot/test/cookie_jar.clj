@@ -129,7 +129,10 @@
            "cookies without uri are not sent to other pages")
       (request "/COOKIES/show")
       (has (in [:request :headers "cookie"] nil)
-           "cookies treat path as case sensitive")))
+           "cookies treat path as case sensitive")
+      (request "/cookies/further/get")
+      (has (in [:request :headers "cookie"] "value=1")
+           "cookies get sent to deeper paths")))
 
 (deftest cookie-security
   (-> (session app)

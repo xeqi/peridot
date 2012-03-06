@@ -64,8 +64,7 @@
                                 (.parse cookie-date-format
                                         expires))))
              (remove #(not (re-find (re-pattern (str "^"
-                                                     (:path %)
-                                                     "[^/]*$"))
+                                                     (:path %)))
                                     uri)))
              (remove (scheme {:http  :secure
                               :https :http-only}))
