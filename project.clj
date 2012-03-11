@@ -5,6 +5,10 @@
   :dependencies [[org.clojure/clojure "1.3.0"]
                  [ring-mock "0.1.1"]
                  [org.clojure/data.codec "0.1.0"]]
-  :profiles {:test {:dependencies [[net.cgrand/moustache "1.1.0"]]}
-             :1.4 {:dependencies [[org.clojure/clojure "1.4.0-beta1"]]}}
+  :profiles {:test {:dependencies [[net.cgrand/moustache "1.1.0"
+                                    :exclusions
+                                    [[org.clojure/clojure]
+                                     [ring/ring-core]]]
+                                   [ring/ring-core "1.0.2"]]}
+             :1.4 {:dependencies [[org.clojure/clojure "1.4.0-beta4"]]}}
   :aliases {"all" ["with-profile" "test:test,1.4"]})
