@@ -67,47 +67,66 @@
 (deftest cookies-keep-a-cookie-jar
   (-> (session app)
       (request "/show")
-      (has (in [:request :headers "cookie"] nil)
-           "cookies should be empty for new session")
+      (doto
+          (#(is (nil? (get (:headers (:request %)) "cookie"))
+                "cookies should be empty for new session")))
       (request "/set" :params {"value" "1"})
       (request "/show")
-      (has (in [:request :headers "cookie"] "value=1")
-           "cookies should be saved and sent back")
+      (doto
+          (#(is (= (get (:headers (:request %)) "cookie")
+                   "value=1")
+                "cookies should be saved and sent back")))
       (request "/show")
-      (has (in [:request :headers "cookie"] "value=1")
-           "old cookies should be saved when no cookies are send back")
+      (doto
+          (#(is (= (get (:headers (:request %)) "cookie")
+                   "value=1")
+                "old cookies should be saved when no cookies are send back")))
       (request "/set" :params {"VALUE" "2"})
       (request "/show")
-      (has (in [:request :headers "cookie"] "VALUE=2")
-           "cookies are case insensitive")
+      (doto
+          (#(is (= (get (:headers (:request %)) "cookie")
+                   "VALUE=2")
+                "cookies are case insensitive")))
       (request "/delete")
       (request "/show")
-      (has (in [:request :headers "cookie"] nil)
-           "cookies can be deleted")))
+      (doto
+          (#(is (nil? (get (:headers (:request %)) "cookie"))
+           "cookies can be deleted")))))
 
 (deftest cookies-for-absolute-url
   (-> (session app)
       (request "http://www.example.com/set" :params {"value" "1"})
       (request "http://www.example.com/show")
-      (has (in [:request :headers "cookie"] "value=1")
-           "cookies should be saved and sent back for absolute url")
+      (doto
+          (#(is (= (get (:headers (:request %)) "cookie")
+                   "value=1")
+                "cookies should be saved and sent back for absolute url")))
       (request "http://WWW.EXAMPLE.COM/show")
-      (has (in [:request :headers "cookie"] "value=1")
-           "cookies domain should be case insensitive")
+      (doto
+          (#(is (= (get (:headers (:request %)) "cookie")
+                   "value=1")
+                "cookies domain should be case insensitive")))
       (request "http://www.other.example.com/show")
-      (has (in [:request :headers "cookie"] nil)
-           "cookies are not sent to other hosts")
+      (doto
+          (#(is (nil? (get (:headers (:request %)) "cookie"))
+                "cookies are not sent to other hosts")))
       (request "http://www.example.com/show")
-      (has (in [:request :headers "cookie"] "value=1")
-           "cookies are sent to subdomains")
+      (doto
+          (#(is (= (get (:headers (:request %)) "cookie")
+                   "value=1")
+                "cookies are sent to subdomains")))
       (request "http://example.com/set" :params {"value" "2"})
       (request "http://www.example.com/show")
-      (has (in [:request :headers "cookie"] "value=1")
-           "cookies are preferred to be more specific")
+      (doto
+          (#(is (= (get (:headers (:request %)) "cookie")
+                   "value=1")
+           "cookies are preferred to be more specific")))
       (request "http://www.example.com/set" :params {"value" "3"})
       (request "http://www.example.com/show")
-      (has (in [:request :headers "cookie"] "value=3")
-           "cookies ordering does not matter for specificity")))
+      (doto
+          (#(is (= (get (:headers (:request %)) "cookie")
+                   "value=3")
+           "cookies ordering does not matter for specificity")))))
 
 (deftest cookie-expires
   (let [state (-> (session app)
@@ -115,41 +134,54 @@
     (binding [peridot.cookie-jar/get-time (fn [] 60001)]
       (-> state
           (request "/expirable/show")
-          (has (in [:request :headers "cookie"] nil)
-               "expired cookies should not be sent")))))
+          (doto
+              (#(is (nil? (get (:headers (:request %)) "cookie"))
+               "expired cookies should not be sent")))))))
 
 (deftest cookies-uri
   (-> (session app)
       (request "/cookies/set" :params {"value" "1"})
       (request "/cookies/get")
-      (has (in [:request :headers "cookie"] "value=1")
-           "cookies without uri are sent to path up to last slash")
+      (doto
+          (#(is (= (get (:headers (:request %)) "cookie")
+                   "value=1")
+                "cookies without uri are sent to path up to last slash")))
       (request "/no-cookies/show")
-      (has (in [:request :headers "cookie"] nil)
-           "cookies without uri are not sent to other pages")
+      (doto
+          (#(is (nil? (get (:headers (:request %)) "cookie"))
+                "cookies without uri are not sent to other pages")))
       (request "/COOKIES/show")
-      (has (in [:request :headers "cookie"] nil)
-           "cookies treat path as case sensitive")
+      (doto
+          (#(is (nil? (get (:headers (:request %)) "cookie"))
+                "cookies treat path as case sensitive")))
       (request "/cookies/further/get")
-      (has (in [:request :headers "cookie"] "value=1")
-           "cookies get sent to deeper paths")))
+      (doto
+          (#(is (= (get (:headers (:request %)) "cookie")
+                   "value=1")
+                "cookies get sent to deeper paths")))))
 
 (deftest cookie-security
   (-> (session app)
       (request "https://example.com/set-secure"
                :params {"value" "1"})
       (request "http://example.com/get")
-      (has (in [:request :headers "cookie"] nil)
-           "secure cookies are not sent to http")
+      (doto
+          (#(is (nil? (get (:headers (:request %)) "cookie"))
+                "secure cookies are not sent to http")))
       (request "https://example.com/get")
-      (has (in [:request :headers "cookie"] "value=1")
-           "secure cookies are sent"))
+      (doto
+          (#(is (= (get (:headers (:request %)) "cookie")
+                   "value=1")
+                "secure cookies are sent"))))
   (-> (session app)
       (request "http://example.com/set-http-only"
                :params {"value" "1"})
       (request "https://example.com/get")
-      (has (in [:request :headers "cookie"] nil)
-           "http-only cookies are not sent to https")
+      (doto
+          (#(is (nil? (get (:headers (:request %)) "cookie"))
+                "http-only cookies are not sent to https")))
       (request "http://example.com/get")
-      (has (in [:request :headers "cookie"] "value=1")
-           "http-only cookies are sent")))
+      (doto
+          (#(is (= (get (:headers (:request %)) "cookie")
+                   "value=1")
+                "http-only cookies are sent")))))

@@ -112,37 +112,3 @@
            location
            :headers {"referrer" (build-url (:request state))})
         (throw (Exception. "Previous response was not a redirect")))))
-
-(defmethod assert-expr 'in [msg form]
-  `(let [state# ~(nth form 1)
-         keys# ~(nth form 2)
-         expected#  ~(nth form 3)
-         actual# (get-in state# keys#)]
-     (do-report {:type (if (= expected# actual#)
-                         :pass
-                         :fail)
-                 :message ~msg
-                 :expected (cons (first '~form)
-                                 (rest (rest '~form)))
-                 :actual actual#})
-     state#))
-
-(defmethod assert-expr 'inf [msg form]
-  `(let [state# ~(nth form 1)
-         keys# ~(nth form 2)
-         expected#  ~(nth form 3)
-         actual# (get-in state# keys#)]
-     (do-report {:type (if (expected# actual#)
-                         :pass
-                         :fail)
-                 :message ~msg
-                 :expected (cons (first '~form)
-                                 (rest (rest '~form)))
-                 :actual actual#})
-     state#))
-
-(defmacro has
-  ([state form msg]
-     `(is (~(first form)
-           ~state
-           ~@(rest form)) ~msg)))
