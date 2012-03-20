@@ -5,6 +5,7 @@
            java.io.PipedOutputStream
            java.io.PipedInputStream
            java.io.File
+           java.nio.charset.Charset
            javax.activation.FileTypeMap))
 
 (defn multipart? [params]
@@ -22,7 +23,7 @@
 (defmethod add-part :default [m k v]
   (.addPart m
             k
-            (StringBody. (str v))))
+            (StringBody. (str v) (Charset/forName "UTF-8"))))
 
 (defn entity [params]
   (let [mpe (MultipartEntity.)]
@@ -41,14 +42,3 @@
      :content-type (.getValue (.getContentType mpe))
      :headers {:content-type (.getValue (.getContentType mpe))
                :content-length (.getContentLength mpe)}}))
-
-(comment
-  ;Add tests
-  ;does (content-type ...) interfere?
-  ;use below
-  (doto
-      (#(is (re-find #"multipart/form-data;"
-                     (:content-type (:request %))))))
-  ;multiple files?
-  ;can we use rack-test tests?
-  )

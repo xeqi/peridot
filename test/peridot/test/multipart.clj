@@ -25,7 +25,7 @@
       (request "/"
                :request-method :post
                :params {"file" (io/file (io/resource "file.txt"))
-                        "something" "else"})
+                        "something" "☃"})
       (doto
           (#(is (re-find #"multipart/form-data;"
                          (:content-type (:request %)))
@@ -36,4 +36,4 @@
         (#(let [body (slurp (:body (:request %)))]
             (is (re-find #"hi from file" body))
             (is (re-find #"name=\"something\"" body))
-            (is (re-find #"\r\nelse\r\n--" body)))))))
+            (is (re-find #"\r\n☃\r\n--" body)))))))
