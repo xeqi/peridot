@@ -2,6 +2,7 @@
   (:use clojure.test)
   (:require [ring.mock.request :as mock]
             [peridot.cookie-jar :as cj]
+            [peridot.multipart :as multipart]
             [clojure.data.codec.base64 :as base64]
             [clojure.string :as string]))
 
@@ -11,7 +12,7 @@
 (defn ^:private set-post-content-type [request]
   (if (and (not (:content-type request))
            (= :post (:request-method request)))
-    (assoc request :content-type "application/x-www-form-urlencoded")
+    (mock/content-type request "application/x-www-form-urlencoded")
     request))
 
 (defn ^:private set-https-port [request]
@@ -19,13 +20,10 @@
     (assoc request :server-port 443)
     request))
 
-(defn ^:private to-header-key [k]
-  (string/lower-case (str k)))
-
 (defn ^:private add-headers [request headers]
   (reduce (fn [req [k v]]
             (if v
-              (assoc-in req [:headers (to-header-key k)] v)
+              (mock/header req k v)
               req))
           request
           headers))
@@ -35,10 +33,19 @@
           request
           env))
 
+(defn ^:private set-content-type [request content-type]
+  (if content-type
+    (mock/content-type request content-type)
+    request))
+
 (defn ^:private build-request [uri env headers cookie-jar content-type]
   (let [env (apply hash-map env)
         params (:params env)
-        request (mock/request :get uri params)]
+        request (if (multipart/multipart? params)
+                  (merge-with merge
+                              (multipart/build params)
+                              (mock/request :get uri))
+                  (mock/request :get uri params))]
     (-> request
         (add-headers (-> headers
                          (merge (cj/cookies-for cookie-jar
@@ -46,7 +53,7 @@
                                                 (:uri request)
                                                 (get-host request)))
                          (merge (:headers env))))
-        (assoc :content-type content-type)
+        (set-content-type content-type)
         (add-env (dissoc (dissoc env :params) :headers))
         set-post-content-type
         set-https-port)))
