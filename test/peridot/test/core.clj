@@ -128,11 +128,13 @@
                 "follow redirect should not keep params")))))
 
 (deftest follow-redirect-errors
-  (is (thrown-with-msg? Exception #"Previous response was not a redirect"
+  (is (thrown-with-msg? IllegalArgumentException
+        #"Previous response was not a redirect"
         (-> (session app)
             (request "/")
             (follow-redirect))))
-  (is (thrown-with-msg? Exception #"Previous response was not a redirect"
+  (is (thrown-with-msg? IllegalArgumentException
+        #"Previous response was not a redirect"
         (-> (session app)
             (follow-redirect)))))
 

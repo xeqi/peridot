@@ -52,4 +52,4 @@
         (request state
            location
            :headers {"referrer" (pr/url (:request state))})
-        (throw (Exception. "Previous response was not a redirect")))))
+        (throw (IllegalArgumentException. "Previous response was not a redirect")))))
