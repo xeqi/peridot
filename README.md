@@ -23,6 +23,8 @@ peridot is available from [clojars](http://clojars.org).
 
 ## Usage
 
+The api namespace is ```peridot.core```.  If you are using peridot in tests you may want to have ```(:use [peridot.core])``` in your ```ns``` declaration.  All examples below assume so.
+
 peridot is designed to be used with clojure.core/->.
 
 ### Initialization
