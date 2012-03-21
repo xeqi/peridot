@@ -2,63 +2,100 @@
 
 peridot is a testing API for [ring](https://github.com/mmcgrana/ring) apps. It can be used on its own or as a reusable starting point for Web frameworks and testing libraries to build on. Its initial functionality is based on an incomplete port of [Rack::Test](https://github.com/brynary/rack-test)'s test suite.
 
-## Features
-
-* Designed to be used with clojure.core/->
-* Maintains a cookie jar across requests
-* Set request headers to be used by all subsequent requests
-
 ## Dependency Information
 
 peridot is available from [clojars](http://clojars.org).
 
+### Leiningen
 ```clojure
-[peridot/peridot "0.0.2"]
+[peridot/peridot "0.0.5"]
 ```
 
-or to your Maven project's `pom.xml` (requires adding clojars repo):
+### Maven (requires adding clojars repo):
 
 ```xml
 <dependency>
   <groupId>peridot</groupId>
   <artifactId>peridot</artifactId>
-  <version>0.0.2</version>
+  <version>0.0.5</version>
 </dependency>
 ```
 
-## Example Usage
+## Usage
+
+peridot is designed to be used with clojure.core/->.
+
+### Initialization
+
+You can create an initial state with ```session```.
 
 ```clojure
-(use '[peridot.core])
-
-(-> (session ring-app) ;Use your ring app
-    (request "/login" :request-method :post
-                      :params {"username" "someone"
-                               "password" "password"})
-    (follow-redirect)
-    (has (in [:response :body] "Hi someone"))
-    (request "/logout")
-    (follow-redirect)
-    (has (in [:response :body] "Hi unknown person")))
-  
-(-> (session app)
-    (header "User-Agent" "Firefox")
-    (request "/")
-    (has (in [:request :headers "user-agent"] "Firefox")))
-
-(-> (session ring-app)
-    (authorize "bryan" "secret")
-    (request "/")
-    (has (in [:request :headers "authorization"] "Basic YnJ5YW46c2VjcmV0\n")))
+(session ring-app) ;Use your ring app
 ```
 
-session, request, headers, authorize, follow-redirect, and (has (in..)) are the main api methods.  Each returns a state map with :request and :response being the ring request and response maps that were sent and recieved.
+### Navigation
 
-Additional docs to be created later.  See tests until then.
+You can use ```request``` to send a request to your ring app.
+
+```clojure
+(-> (session ring-app) ;Use your ring app
+    (request "/")
+    (request "/search" :request-method :post
+                       :params {:q "clojure"}))
+```
+
+It will use ```:get``` by default.  Options should be from the request map portion of the [ring spec](https://github.com/mmcgrana/ring/blob/master/SPEC).
+
+```:params``` should not be nested. Most params will be sent as ```(str value)``. If a value is a ```java.io.File``` then peridot will send the request as a multipart form using the contents of the file.
+
+peridot will not follow redirects automatically.  To follow a redirect use ```follow-redirect```.  This will throw an ```IllegalArgumentException``` when the last response was not a redirect.
+
+```clojure
+(-> (session ring-app) ;Use your ring app
+    (request "/login" :request-method :post
+                      :params {:username "someone"
+                               :password "password"})
+    (follow-redirect))
+```
+
+### Persistent Information
+
+It can be useful to set persistent information across requests.
+
+```header``` will set a header.
+```authorize``` will use basic authentication.
+```content-type``` will set the content-type.
+
+```clojure
+(-> (session ring-app) ;Use your ring app
+    (header "User-Agent" "Firefox")
+    (authorize "bryan" "secret")
+    (content-type "application/json")
+    (request "/task/create" :body some-json))
+```
+
+### Querying
+
+The state information returned by each function has ```:request``` and ```:response``` for information from the last interaction with the server.
+
+## Transactions and database setup
+
+peridot runs without an http server and, depending on your setup, transactions can be used to rollback and isolate tests.  Some fixtures may be helpful:
+
+```clojure
+(test/use-fixtures :once
+                   (fn [f]
+                     (clojure.java.jdbc/with-connection db (f))))
+(test/use-fixtures :each
+                   (fn [f]
+                     (clojure.java.jdbc/transaction
+                      (clojure.java.jdbc/set-rollback-only)
+                      (f))))
+```
 
 ## Building
 
-`lein` version 2 is used as the build tool.
+[leiningen](https://github.com/technomancy/leiningen) version 2 is used as the build tool.  ```lein2 all test``` will run the test suite against clojure 1.3 and a recent 1.4-beta.
 
 ## License
 
