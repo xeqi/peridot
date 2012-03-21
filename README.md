@@ -85,14 +85,14 @@ The state information returned by each function has ```:request``` and ```:respo
 peridot runs without an http server and, depending on your setup, transactions can be used to rollback and isolate tests.  Some fixtures may be helpful:
 
 ```clojure
-(test/use-fixtures :once
-                   (fn [f]
-                     (clojure.java.jdbc/with-connection db (f))))
-(test/use-fixtures :each
-                   (fn [f]
-                     (clojure.java.jdbc/transaction
-                      (clojure.java.jdbc/set-rollback-only)
-                      (f))))
+(use-fixtures :once
+              (fn [f]
+                (clojure.java.jdbc/with-connection db (f))))
+(use-fixtures :each
+              (fn [f]
+                (clojure.java.jdbc/transaction
+                 (clojure.java.jdbc/set-rollback-only)
+                 (f))))
 ```
 
 ## Building
