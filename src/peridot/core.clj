@@ -1,93 +1,27 @@
 (ns peridot.core
-  (:use clojure.test)
-  (:require [ring.mock.request :as mock]
-            [peridot.cookie-jar :as cj]
-            [peridot.multipart :as multipart]
-            [clojure.data.codec.base64 :as base64]
-            [clojure.string :as string]))
-
-(defn ^:private get-host [request]
-  (string/lower-case (get (:headers request) "host")))
-
-(defn ^:private set-post-content-type [request]
-  (if (and (not (:content-type request))
-           (= :post (:request-method request)))
-    (mock/content-type request "application/x-www-form-urlencoded")
-    request))
-
-(defn ^:private set-https-port [request]
-  (if (= :https (:scheme request))
-    (assoc request :server-port 443)
-    request))
-
-(defn ^:private add-headers [request headers]
-  (reduce (fn [req [k v]]
-            (if v
-              (mock/header req k v)
-              req))
-          request
-          headers))
-
-(defn ^:private add-env [request env]
-  (reduce (fn [req [k v]] (assoc req k v))
-          request
-          env))
-
-(defn ^:private set-content-type [request content-type]
-  (if content-type
-    (mock/content-type request content-type)
-    request))
-
-(defn ^:private build-request [uri env headers cookie-jar content-type]
-  (let [env (apply hash-map env)
-        params (:params env)
-        request (if (multipart/multipart? params)
-                  (merge-with merge
-                              (multipart/build params)
-                              (mock/request :get uri))
-                  (mock/request :get uri params))]
-    (-> request
-        (add-headers (-> headers
-                         (merge (cj/cookies-for cookie-jar
-                                                (:scheme request)
-                                                (:uri request)
-                                                (get-host request)))
-                         (merge (:headers env))))
-        (set-content-type content-type)
-        (add-env (dissoc (dissoc env :params) :headers))
-        set-post-content-type
-        set-https-port)))
-
-(defn ^:private build-url [{:keys [scheme server-name port uri query-string]}]
-  (str (name scheme)
-       "://"
-       server-name
-       (when (and port
-                  (not= port (scheme {:https 443 :http 80})))
-         (str ":" port))
-       uri
-       query-string))
+  (:require [peridot.request :as pr]
+            [peridot.cookie-jar :as pcj]
+            [clojure.data.codec.base64 :as base64]))
 
 (defn session
   "Creates an initial state for passing through the api."
   [app & params]
-  (assoc (apply hash-map params)
-    :app app))
+  (assoc (apply hash-map params) :app app))
 
 (defn request
   "Send a request to the ring app, returns state containing :response and :request sent to and returned from the ring app."
   [{:keys [app headers cookie-jar content-type]} uri & env]
-  (let [request (build-request uri env headers cookie-jar content-type)
+  (let [request (pr/build uri env headers cookie-jar content-type)
         response (app request)]
     (session app
              :response response
              :request request
              :headers headers
              :content-type content-type
-             :cookie-jar (cj/merge-cookies (:headers response)
-                                           cookie-jar
-                                           (:uri request)
-                                           (get-host request)))))
+             :cookie-jar (pcj/merge-cookies (:headers response)
+                                            cookie-jar
+                                            (:uri request)
+                                            (pr/get-host request)))))
 
 (defn header
   "Set headers to be sent for future requests."
@@ -117,5 +51,5 @@
     (if location
         (request state
            location
-           :headers {"referrer" (build-url (:request state))})
+           :headers {"referrer" (pr/url (:request state))})
         (throw (Exception. "Previous response was not a redirect")))))
