@@ -2,7 +2,8 @@
   (:import java.util.Date)
   (:use [peridot.core]
         [clojure.test])
-  (:require [net.cgrand.moustache :as moustache]
+  (:require [peridot.cookie-jar :as cj]
+            [net.cgrand.moustache :as moustache]
             [ring.util.response :as response]
             [ring.middleware.params :as params]
             [ring.middleware.cookies :as cookies]))
@@ -24,7 +25,7 @@
                (cookies-from-map (:params req)
                                  (fn [k v]
                                    {:expires
-                                    (.format peridot.cookie-jar/cookie-date-format
+                                    (.format cj/cookie-date-format
                                              (Date. 60000))}))))}
      ["cookies" "set"]
      {:get (fn [req]
@@ -131,7 +132,7 @@
 (deftest cookie-expires
   (let [state (-> (session app)
                   (request "/expirable/set" :params {"value" "1"}))]
-    (binding [peridot.cookie-jar/get-time (fn [] 60001)]
+    (binding [cj/get-time (fn [] 60001)]
       (-> state
           (request "/expirable/show")
           (doto
