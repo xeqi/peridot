@@ -46,7 +46,7 @@ You can use ```request``` to send a request to your ring app.
 
 It will use ```:get``` by default.  Options should be from the request map portion of the [ring spec](https://github.com/mmcgrana/ring/blob/master/SPEC).
 
-```:params``` should not be nested. Most params will be sent as ```(str value)``. If a value is a ```java.io.File``` then peridot will send the request as a multipart form using the contents of the file.
+```:params``` should not be nested. Most params will be sent as ```(str value)```. If a value is a ```java.io.File``` then peridot will send the request as a multipart form using the contents of the file.
 
 peridot will not follow redirects automatically.  To follow a redirect use ```follow-redirect```.  This will throw an ```IllegalArgumentException``` when the last response was not a redirect.
 
