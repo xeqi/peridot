@@ -28,10 +28,16 @@
           (#(is (= (:query-string (:request %))
                    "foo=bar&zoo=car")
                 "request sends params")))
+      (request "/" :params {:foo "bar"
+                            :zoo "car"})
+      (doto
+          (#(is (= (:query-string (:request %))
+                   "foo=bar&zoo=car")
+                "request sends keyword params")))
       (request "/redirect")
       (doto
           (#(is (= (:status (:response %)) 302)
-            "request does not follow redirects by default")))))
+                "request does not follow redirects by default")))))
 
 (deftest request-posts
   (-> (session app)
