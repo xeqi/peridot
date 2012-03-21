@@ -76,7 +76,7 @@ It can be useful to set persistent information across requests.
 
 ### Querying
 
-The state information returned by each function has ```:request``` and ```:response``` for information from the last interaction with the server.
+The state information returned by each function has ```:request``` and ```:response``` for information from the last interaction with the ring app.
 
 ## Transactions and database setup
 
