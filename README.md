@@ -1,6 +1,6 @@
 # peridot [![Build Status](https://secure.travis-ci.org/xeqi/peridot.png)](http://travis-ci.org/xeqi/peridot)
 
-peridot is a testing API for [ring](https://github.com/mmcgrana/ring) apps. It can be used on its own or as a reusable starting point for Web frameworks and testing libraries to build on. Its initial functionality is based on an incomplete port of [Rack::Test](https://github.com/brynary/rack-test)'s test suite.
+peridot is an interaction library for [ring](https://github.com/mmcgrana/ring) apps. Its initial functionality is based on an incomplete port of [Rack::Test](https://github.com/brynary/rack-test)'s test suite.
 
 ## Dependency Information
 
@@ -25,7 +25,7 @@ peridot is available from [clojars](http://clojars.org).
 
 The api namespace is ```peridot.core```.  If you are using peridot in tests you may want to have ```(:use [peridot.core])``` in your ```ns``` declaration.  All examples below assume so.
 
-peridot is designed to be used with clojure.core/->, and maintains cookies across requests in the threading.
+peridot is designed to be used with ->, and maintains cookies across requests in the threading.
 
 ### Initialization
 
