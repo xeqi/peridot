@@ -25,7 +25,7 @@ peridot is available from [clojars](http://clojars.org).
 
 The api namespace is ```peridot.core```.  If you are using peridot in tests you may want to have ```(:use [peridot.core])``` in your ```ns``` declaration.  All examples below assume so.
 
-peridot is designed to be used with clojure.core/->.
+peridot is designed to be used with clojure.core/->, and maintains cookies across requests in the threading.
 
 ### Initialization
 
@@ -60,6 +60,21 @@ peridot will not follow redirects automatically.  To follow a redirect use ```fo
     (follow-redirect))
 ```
 
+### Cookies
+
+peridot will manage cookies through the threading.  This allows you to login and perform actions as that user.
+
+```clojure
+(-> (session ring-app) ;Use your ring app
+    (request "/login" :request-method :post
+                      :params {:username "someone"
+                               :password "password"})
+    (follow-redirect)
+    (request "/tasks")
+    (request "/tasks/create" ...)
+    (request "/tasks/1")
+```
+
 ### Persistent Information
 
 It can be useful to set persistent information across requests.
@@ -73,7 +88,8 @@ It can be useful to set persistent information across requests.
     (header "User-Agent" "Firefox")
     (authorize "bryan" "secret")
     (content-type "application/json")
-    (request "/task/create" :body some-json))
+    (request "/tasks/create" :request-method :put
+                             :body some-json))
 ```
 
 ### Querying
