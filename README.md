@@ -8,7 +8,7 @@ peridot is available from [clojars](http://clojars.org).
 
 ### Leiningen
 ```clojure
-[peridot/peridot "0.0.5"]
+[peridot "0.0.5"]
 ```
 
 ### Maven (requires adding clojars repo):
