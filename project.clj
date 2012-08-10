@@ -3,7 +3,7 @@
   :url "https://github.com/xeqi/peridot"
   :min-lein-version "2.0.0"
   :dependencies [[org.clojure/clojure "1.3.0"]
-                 [ring-mock "0.1.1"]
+                 [ring-mock "0.1.3"]
                  [org.clojure/data.codec "0.1.0"]
                  [org.apache.httpcomponents/httpmime "4.1.3"]]
   :profiles {:test {:dependencies [[net.cgrand/moustache "1.1.0"
