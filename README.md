@@ -8,7 +8,7 @@ peridot is available from [clojars](http://clojars.org).
 
 ### Leiningen
 ```clojure
-[peridot "0.0.5"]
+[peridot "0.0.6"]
 ```
 
 ### Maven (requires adding clojars repo):
@@ -17,7 +17,7 @@ peridot is available from [clojars](http://clojars.org).
 <dependency>
   <groupId>peridot</groupId>
   <artifactId>peridot</artifactId>
-  <version>0.0.5</version>
+  <version>0.0.6</version>
 </dependency>
 ```
 
@@ -117,6 +117,6 @@ peridot runs without an http server and, depending on your setup, transactions c
 
 ## License
 
-Copyright (C) 2012 Nelson Morris
+Copyright (C) 2012 Nelson Morris and [contributors](https://github.com/xeqi/peridot/graphs/contributors)
 
 Distributed under the Eclipse Public License, the same as Clojure.
