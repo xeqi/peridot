@@ -39,11 +39,12 @@
 (defn build [uri env headers cookie-jar content-type]
   (let [env (apply hash-map env)
         params (:params env)
+        method (:request-method env :get)
         request (if (multipart/multipart? params)
                   (merge-with merge
                               (multipart/build params)
-                              (mock/request :get uri))
-                  (mock/request :get uri params))]
+                              (mock/request method uri))
+                  (mock/request method uri params))]
     (-> request
         (add-headers (-> headers
                          (merge (cj/cookies-for cookie-jar
