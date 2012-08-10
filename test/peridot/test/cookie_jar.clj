@@ -94,6 +94,30 @@
           (#(is (nil? (get (:headers (:request %)) "cookie"))
            "cookies can be deleted")))))
 
+(deftest cookie-jar-keeps-multiple-cookies-per-host
+  (-> (session app)
+      (request "/show")
+      (doto
+          (#(is (nil? (get (:headers (:request %)) "cookie"))
+                "cookies should be empty for new session")))
+      (request "/set" :params {"value" "1"})
+      (request "/show")
+      (doto
+          (#(is (= (get (:headers (:request %)) "cookie")
+                   "value=1")
+                "first cookie should be saved and sent back")))
+      (request "/set" :params {"second-value" "2"})
+      (request "/show")
+      (doto
+          (#(is (= (get (:headers (:request %)) "cookie")
+                   "second-value=2;value=1")
+                "first and second cookie under same host should be stored and send back")))
+      (request "/delete")
+      (request "/show")
+      (doto
+          (#(is (nil? (get (:headers (:request %)) "cookie"))
+           "all cookies under same host can be deleted")))))
+
 (deftest cookies-for-absolute-url
   (-> (session app)
       (request "http://www.example.com/set" :params {"value" "1"})
