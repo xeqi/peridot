@@ -45,7 +45,25 @@
       (doto
           (#(is (= (:content-type (:request %))
                    "application/x-www-form-urlencoded")
-                 "request uses urlencoded content-type for post")))
+                "request uses urlencoded content-type for post"))
+        (#(is (= (:request-method (:request %))
+                 :post)
+              "request uses post verb as the :request-method")))
+      (request "/" :request-method :post
+               :params {"foo" "bar"
+                        "zoo" "car"})
+      (doto
+          (#(is (= (:content-type (:request %))
+                   "application/x-www-form-urlencoded")
+                "request uses urlencoded content-type"))
+        (#(is (= (:request-method (:request %))
+                 :post)
+              "request uses post verb as the :request-method"))
+        (#(is (not (nil? (:body (:request %))))
+              "request has a body of content"))
+        (#(is (= (slurp (:body (:request %)))
+                 "foo=bar&zoo=car")
+              "request body reflects the parameters")))
       (request "/"
                :request-method :post
                :content-type "application/xml")
