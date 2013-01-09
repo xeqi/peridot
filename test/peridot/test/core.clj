@@ -181,3 +181,9 @@
       (doto
           (#(is (nil? (:content-type (:request %)))
            "content-type can clear a value")))))
+
+(deftest body-is-an-inputstream
+  (-> (session app)
+      (request "/" :body "some string")
+      (doto
+          (#(is (instance? java.io.InputStream (:body (:request %))))))))

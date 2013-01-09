@@ -2,7 +2,15 @@
   (:require [peridot.multipart :as multipart]
             [peridot.cookie-jar :as cj]
             [clojure.string :as string]
-            [ring.mock.request :as mock]))
+            [clojure.java.io :as io]
+            [ring.mock.request :as mock])
+  (:import java.io.ByteArrayInputStream))
+
+(defmulti to-input-stream class)
+
+(defmethod to-input-stream nil [_] nil)
+(defmethod to-input-stream String [s] (-> s .getBytes ByteArrayInputStream.))
+(defmethod to-input-stream :default [x] (io/input-stream x))
 
 (defn get-host [request]
   (string/lower-case (get (:headers request) "host")))
@@ -54,6 +62,7 @@
                          (merge (:headers env))))
         (set-content-type content-type)
         (add-env (dissoc (dissoc env :params) :headers))
+        (update-in [:body] to-input-stream)
         set-post-content-type
         set-https-port)))
 
