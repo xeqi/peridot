@@ -186,4 +186,5 @@
   (-> (session app)
       (request "/" :body "some string")
       (doto
-          (#(is (instance? java.io.InputStream (:body (:request %))))))))
+          (#(is (instance? java.io.InputStream (:body (:request %)))))
+        (#(is (= "some string" (slurp (:body (:request %)))))))))
