@@ -1,25 +1,10 @@
 # peridot [![Build Status](https://secure.travis-ci.org/xeqi/peridot.png)](http://travis-ci.org/xeqi/peridot)
 
-peridot is an interaction library for [ring](https://github.com/mmcgrana/ring) apps. Its initial functionality is based on an incomplete port of [Rack::Test](https://github.com/brynary/rack-test)'s test suite.
+peridot is an interaction library for [ring](https://github.com/mmcgrana/ring) apps. Its functionality is based on an partial port of [Rack::Test](https://github.com/brynary/rack-test)'s test suite.
 
 ## Dependency Information
 
-peridot is available from [clojars](http://clojars.org).
-
-### Leiningen
-```clojure
-[peridot "0.0.6"]
-```
-
-### Maven (requires adding clojars repo):
-
-```xml
-<dependency>
-  <groupId>peridot</groupId>
-  <artifactId>peridot</artifactId>
-  <version>0.0.6</version>
-</dependency>
-```
+peridot's latest version and information on how to install it is available from [clojars](http://clojars.org/peridot).
 
 ## Usage
 
