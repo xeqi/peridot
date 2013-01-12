@@ -117,12 +117,12 @@
       (request "/")
       (doto
           (#(is (= (get (:headers (:request %)) "authorization")
-                   "Basic YnJ5YW46c2VjcmV0\n")
+                   "Basic YnJ5YW46c2VjcmV0")
                 "authorize sets the authorization header")))
       (request "/")
       (doto
           (#(is (= (get (:headers (:request %)) "authorization")
-                   "Basic YnJ5YW46c2VjcmV0\n")
+                   "Basic YnJ5YW46c2VjcmV0")
            "authorize persists the header across requests")))))
 
 (deftest follow-redirect-generic

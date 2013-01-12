@@ -40,8 +40,7 @@
                                      (String. (base64/encode
                                                (.getBytes (str user ":" pass)
                                                           "UTF-8"))
-                                              "UTF-8")
-                                     "\n")))
+                                              "UTF-8"))))
 
 (defn follow-redirect
   "Follow the redirect from the previous response."
