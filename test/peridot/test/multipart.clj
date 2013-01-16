@@ -10,30 +10,34 @@
   (is (not (multipart/multipart? {"file" "value"}))))
 
 (deftest uploading-a-file
-  (-> (session (constantly (response/response "ok")))
-      (request "/"
-               :request-method :post
-               :params {"file" (io/file (io/resource "file.txt"))})
-      (doto
-          (#(is (re-find #"multipart/form-data;"
-                         (:content-type (:request %)))
-                "files shoul set content-type to multipart/form-data"))
-        (#(is (re-find #"hi from file" (slurp (:body (:request %)))))))))
+  (let [req (:request (-> (session (constantly (response/response "ok")))
+                          (request "/"
+                                   :request-method :post
+                                   :params {"file" (io/file (io/resource
+                                                             "file.txt"))})))]
+    (is (re-find #"multipart/form-data;"
+                 (:content-type req))
+        "files should set content-type to multipart/form-data")
+    (is (re-find #"multipart/form-data;"
+                 (get-in req [:headers "content-type"]))
+        "files should set content-type header to multipart/form-data")
+    (is (re-find #"hi from file\n" (slurp (:body req))))))
 
 (deftest uploading-a-file-with-params
-  (-> (session (constantly (response/response "ok")))
-      (request "/"
-               :request-method :post
-               :params {"file" (io/file (io/resource "file.txt"))
-                        "something" "☃"})
-      (doto
-          (#(is (re-find #"multipart/form-data;"
-                         (:content-type (:request %)))
-                "files should set content-type to multipart/form-data"))
-        ;;This is a simple test
-        ;;perhaps doing a roundtrip with multipart-params middleware
-        ;;and checking response would be better
-        (#(let [body (slurp (:body (:request %)))]
-            (is (re-find #"hi from file" body))
-            (is (re-find #"name=\"something\"" body))
-            (is (re-find #"\r\n☃\r\n--" body)))))))
+  (let [req (:request (-> (session (constantly (response/response "ok")))
+                          (request "/"
+                                   :request-method :post
+                                   :params {"file" (io/file (io/resource "file.txt"))
+                                            "something" "☃"})))]
+    (is (re-find #"multipart/form-data;" (:content-type req))
+        "files should set content-type to multipart/form-data")
+    (is (re-find #"multipart/form-data;"
+                 (get-in req [:headers "content-type"]))
+        "files should set content-type header to multipart/form-data")
+    ;;This is a simple test
+    ;;perhaps doing a roundtrip with multipart-params middleware
+    ;;and checking response would be better
+    (let [body (slurp (:body req))]
+      (is (re-find #"hi from file" body))
+      (is (re-find #"name=\"something\"" body))
+      (is (re-find #"\r\n☃\r\n--" body)))))
