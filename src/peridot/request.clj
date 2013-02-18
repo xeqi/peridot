@@ -66,12 +66,12 @@
         set-post-content-type
         set-https-port)))
 
-(defn url [{:keys [scheme server-name port uri query-string]}]
+(defn url [{:keys [scheme server-name server-port uri query-string]}]
   (str (name scheme)
        "://"
        server-name
-       (when (and port
-                  (not= port (scheme {:https 443 :http 80})))
-         (str ":" port))
+       (when (and server-port
+                  (not= server-port (scheme {:https 443 :http 80})))
+         (str ":" server-port))
        uri
        query-string))
