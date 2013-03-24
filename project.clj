@@ -16,5 +16,5 @@
                                    [ring/ring-core "1.0.2"]]
                     :resource-paths ["test-resources"]}
              :1.4 {:dependencies [[org.clojure/clojure "1.4.0"]]}
-             :1.5 {:dependencies [[org.clojure/clojure "1.5.0-RC16"]]}}
+             :1.5 {:dependencies [[org.clojure/clojure "1.5.1"]]}}
   :aliases {"all" ["with-profile" "test:test,1.4:test,1.5"]})

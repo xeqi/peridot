@@ -1,6 +1,6 @@
 # peridot [![Build Status](https://secure.travis-ci.org/xeqi/peridot.png)](http://travis-ci.org/xeqi/peridot)
 
-peridot is an interaction library for [ring](https://github.com/mmcgrana/ring) apps. Its functionality is based on an partial port of [Rack::Test](https://github.com/brynary/rack-test)'s test suite.
+peridot is an interaction library for [ring](https://github.com/ring-clojure/ring) apps. Its functionality is based on an partial port of [Rack::Test](https://github.com/brynary/rack-test)'s test suite.
 
 ## Dependency Information
 
@@ -98,10 +98,10 @@ peridot runs without an http server and, depending on your setup, transactions c
 
 ## Building
 
-[leiningen](https://github.com/technomancy/leiningen) version 2 is used as the build tool.  ```lein2 all test``` will run the test suite against clojure 1.3 and a recent 1.4-beta.
+[leiningen](https://github.com/technomancy/leiningen) version 2 is used as the build tool.  ```lein2 all test``` will run the test suite against clojure 1.3, 1.4 and 1.5.1.
 
 ## License
 
-Copyright (C) 2012 Nelson Morris and [contributors](https://github.com/xeqi/peridot/graphs/contributors)
+Copyright (C) 2013 Nelson Morris and [contributors](https://github.com/xeqi/peridot/graphs/contributors)
 
 Distributed under the Eclipse Public License, the same as Clojure.
