@@ -81,8 +81,7 @@
              (remove #(not (re-find (re-pattern (str "^"
                                                      (:path %)))
                                     uri)))
-             (remove (scheme {:http  :secure
-                              :https :http-only}))
+             (remove #(and (:secure %) (= scheme :http)))
              (map :raw)
              (interpose ";")
              (apply str))]

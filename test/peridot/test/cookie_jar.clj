@@ -223,8 +223,9 @@
                :params {"value" "1"})
       (request "https://example.com/get")
       (doto
-          (#(is (nil? (get (:headers (:request %)) "cookie"))
-                "http-only cookies are not sent to https")))
+          (#(is (= (get (:headers (:request %)) "cookie")
+                   "value=1")
+                "http-only cookies are still sent to https")))
       (request "http://example.com/get")
       (doto
           (#(is (= (get (:headers (:request %)) "cookie")
