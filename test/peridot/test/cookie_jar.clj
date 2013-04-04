@@ -5,8 +5,11 @@
   (:require [peridot.cookie-jar :as cj]
             [net.cgrand.moustache :as moustache]
             [ring.util.response :as response]
+            [ring.util.codec :as codec]
             [ring.middleware.params :as params]
-            [ring.middleware.cookies :as cookies]))
+            [ring.middleware.cookies :as cookies]
+            [clj-time.core :as t]
+            [clj-time.format :as tf]))
 
 (defn cookies-from-map [m f]
   (apply merge
@@ -18,15 +21,12 @@
   (params/wrap-params
    (cookies/wrap-cookies
     (moustache/app
-     ["expireable" "set"]
+     ["expirable" "set"]
      {:get (fn [req]
              (assoc (response/response "ok")
                :cookies
                (cookies-from-map (:params req)
-                                 (fn [k v]
-                                   {:expires
-                                    (.format cj/cookie-date-format
-                                             (Date. 60000))}))))}
+                                 (fn [k v] {:expires v}))))}
      ["cookies" "set"]
      {:get (fn [req]
              (assoc (response/response "ok")
@@ -154,14 +154,34 @@
            "cookies ordering does not matter for specificity")))))
 
 (deftest cookie-expires
-  (let [state (-> (session app)
-                  (request "/expirable/set" :params {"value" "1"}))]
-    (binding [cj/get-time (fn [] 60001)]
-      (-> state
-          (request "/expirable/show")
-          (doto
-              (#(is (nil? (get (:headers (:request %)) "cookie"))
-               "expired cookies should not be sent")))))))
+  (let [hour-ago (t/from-now (t/hours -1))
+        ; See http://tools.ietf.org/html/rfc2616#section-3.3.1
+        params {"rfc822" (tf/unparse (:rfc822 tf/formatters) hour-ago)
+                "rfc850" (tf/unparse
+                           (tf/formatter "EEEE, dd-MMM-yy HH:mm:ss z")
+                           hour-ago)}
+        state (-> (session app)
+                  (request "/expirable/set" :params params))]
+    (-> state
+      (request "/expirable/show")
+      (doto
+          (#(is (nil? (get (:headers (:request %)) "cookie"))
+                "expired cookies should not be sent")))))
+  (let [hour-ahead (t/from-now (t/hours 1))
+        rfc822date (tf/unparse (:rfc822 tf/formatters) hour-ahead)
+        rfc850date (tf/unparse (tf/formatter "EEEE, dd-MMM-yy HH:mm:ss z")
+                               hour-ahead)
+        params {"rfc822" rfc822date, "rfc850" rfc850date}
+        state (-> (session app)
+                  (request "/expirable/set" :params params))]
+    (-> state
+      (request "/expirable/show")
+      (doto
+          (#(is (= (get (:headers (:request %)) "cookie")
+                   (format "rfc822=%s;rfc850=%s"
+                           (codec/form-encode rfc822date)
+                           (codec/form-encode rfc850date)))
+                "un-expired cookies should be sent"))))))
 
 (deftest cookies-uri
   (-> (session app)

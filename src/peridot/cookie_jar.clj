@@ -1,13 +1,29 @@
 (ns peridot.cookie-jar
   (:import java.text.SimpleDateFormat
+           java.text.ParseException
+           java.lang.RuntimeException
            java.util.Date)
-  (:require [clojure.string :as string]))
+  (:require [clojure.string :as string]
+            [clj-time.core :as t]
+            [clj-time.format :as tf]))
 
-(defn ^:dynamic get-time []
-  (System/currentTimeMillis))
+(def cookie-date-formats
+  (map #(SimpleDateFormat. %)
+       ["EEE, dd MMM yyyy HH:mm:ss z"
+        "EEEE, dd-MMM-yy HH:mm:ss z"]))
 
-(def cookie-date-format
-  (SimpleDateFormat. "EEE, dd-MMM-yyyy hh:mm:ss z"))
+(defn ^:private parse-date
+  "Try valid HTTP date formats until we get a date"
+  [date]
+  (or (some
+        (fn [format]
+          (try
+            (.parse format date)
+            ; Clojure 1.3 wraps the ParseException in a RuntimeException
+            (catch RuntimeException e false)
+            (catch ParseException e false)))
+        cookie-date-formats)
+      (throw (RuntimeException. (format "Failed to parse date: %s" date)))))
 
 (defn ^:private dash-match [[ _ g1 g2]]
   (str g1 "-" g2))
@@ -60,9 +76,8 @@
              (apply merge)
              (map second)
              (remove #(when-let [expires (:expires %)]
-                        (.after (Date. (get-time))
-                                (.parse cookie-date-format
-                                        expires))))
+                        (.after (Date.)
+                                (parse-date expires))))
              (remove #(not (re-find (re-pattern (str "^"
                                                      (:path %)))
                                     uri)))
