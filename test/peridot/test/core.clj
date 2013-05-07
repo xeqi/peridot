@@ -34,6 +34,11 @@
           (#(is (= (:query-string (:request %))
                    "foo=bar&zoo=car")
                 "request sends keyword params")))
+      (request "/" :params {"list" ["a" "b" "c"]})
+      (doto
+        (#(is (= (:query-string (:request %))
+                 "list=a&list=b&list=c")
+              "request sends lists of params")))
       (request "/redirect")
       (doto
           (#(is (= (:status (:response %)) 302)
@@ -64,6 +69,12 @@
         (#(is (= (slurp (:body (:request %)))
                  "foo=bar&zoo=car")
               "request body reflects the parameters")))
+      (request "/" :request-method :post
+               :params {"list" ["a" "b" "c"]})
+      (doto
+        (#(is (= (slurp (:body (:request %)))
+                 "list=a&list=b&list=c")
+              "request body can send lists of params")))
       (request "/"
                :request-method :post
                :content-type "application/xml")
