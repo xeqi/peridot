@@ -1,3 +1,7 @@
+## 0.2.1 / 2013-5-29
+
+* Support lists in param maps (Glen Mailer, through work done in ring-mock)
+
 ## 0.2.0 / 2013-4-4
 
 * Use RFC822 or RFC850 for cookie expiration parsing (Glen Mailer)
