@@ -8,7 +8,8 @@
                  [ring-mock "0.1.5"]
                  [org.clojure/data.codec "0.1.0"]
                  [org.apache.httpcomponents/httpmime "4.1.3"
-                  :exclusions [commons-logging]]]
+                  :exclusions [commons-logging]]
+                 [clj-time "0.5.1"]]
   :profiles {:test {:dependencies [[net.cgrand/moustache "1.1.0"
                                     :exclusions
                                     [[org.clojure/clojure]
