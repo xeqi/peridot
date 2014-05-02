@@ -23,6 +23,20 @@
         "files should set content-type header to multipart/form-data")
     (is (re-find #"hi from file\n" (slurp (:body req))))))
 
+(deftest uploading-a-file-with-keyword-keys
+  (let [req (:request (-> (session (constantly (response/response "ok")))
+                          (request "/"
+                                   :request-method :post
+                                   :params {:file (io/file (io/resource
+                                                             "file.txt"))})))]
+    (is (re-find #"multipart/form-data;"
+                 (:content-type req))
+        "files should set content-type to multipart/form-data")
+    (is (re-find #"multipart/form-data;"
+                 (get-in req [:headers "content-type"]))
+        "files should set content-type header to multipart/form-data")
+    (is (re-find #"hi from file\n" (slurp (:body req))))))
+
 (deftest uploading-a-file-with-params
   (let [req (:request (-> (session (constantly (response/response "ok")))
                           (request "/"
