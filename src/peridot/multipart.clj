@@ -11,18 +11,21 @@
 (defn multipart? [params]
   (some #(instance? File %) (vals params)))
 
+(defn ensure-string [k]
+  (if (keyword? k) (name k) (str k)))
+
 (defmulti add-part
   (fn [multipartentity key value] (type value)))
 
 (defmethod add-part File [m k f]
   (.addPart m
-            k
+            (ensure-string k)
             (FileBody. f (.getContentType (FileTypeMap/getDefaultFileTypeMap)
                                           f))))
 
 (defmethod add-part :default [m k v]
   (.addPart m
-            k
+            (ensure-string k)
             (StringBody. (str v) (Charset/forName "UTF-8"))))
 
 (defn entity [params]
