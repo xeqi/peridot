@@ -1,4 +1,5 @@
 (ns peridot.multipart
+  (:require [ring.util.codec :as codec])
   (:import org.apache.http.entity.mime.MultipartEntity
            org.apache.http.entity.mime.content.StringBody
            org.apache.http.entity.mime.content.FileBody
@@ -12,7 +13,10 @@
   (some #(instance? File %) (vals params)))
 
 (defn ensure-string [k]
-  (if (keyword? k) (name k) (str k)))
+  "Ensures that the resulting key is a form-encoded string. If k is not a
+  keyword or a string, then (str k) turns it into a string and passes it on to
+  form-encode."
+  (codec/form-encode (if (keyword? k) (name k) (str k))))
 
 (defmulti add-part
   (fn [multipartentity key value] (type value)))
