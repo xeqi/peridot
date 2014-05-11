@@ -10,6 +10,11 @@
                                      (response/redirect "/redirected"))}
                  ["redirected"] {:get "You've been redirected"}))
 
+(defn vhost-app [req]
+  (condp = (:server-name req)
+    "example.com" (app req)
+    (response/not-found "not found")))
+
 (deftest request-generic
   (-> (session app)
       (request "/")
@@ -155,6 +160,20 @@
       (doto
           (#(is (nil? (:params (:response %)))
                 "follow redirect should not keep params")))))
+
+(deftest follow-redirect-vhosts
+  (-> (session vhost-app)
+      (request "http://example.com/redirect" :params {"bar" "foo"})
+      (follow-redirect)
+      (doto
+        (#(is (= (get-in % [:response :status])
+                 200)
+              "follow redirect should have kept server-name"))
+        (#(is (= (get-in % [:response :body])
+                 "You've been redirected")
+              "follow redirect should have correct body"))
+        (#(is (nil? (get-in % [:response :params]))
+              "follow redirect should not keep params")))))
 
 (deftest follow-redirect-errors
   (is (thrown-with-msg? IllegalArgumentException

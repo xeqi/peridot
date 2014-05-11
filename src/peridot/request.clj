@@ -74,4 +74,5 @@
                   (not= server-port (scheme {:https 443 :http 80})))
          (str ":" server-port))
        uri
-       query-string))
+       (when query-string
+         (str "?" query-string))))

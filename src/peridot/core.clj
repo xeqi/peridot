@@ -41,6 +41,12 @@
                                                (.getBytes (str user ":" pass)
                                                           "UTF-8"))
                                               "UTF-8"))))
+(defn- expand-location
+  "Expand a location header into an absolute url"
+  [location request]
+  (if (re-find #"://" location)
+    location
+    (pr/url (assoc request :uri location :query-string nil))))
 
 (defn follow-redirect
   "Follow the redirect from the previous response."
@@ -49,6 +55,6 @@
         location (when headers (headers "Location"))]
     (if location
         (request state
-           location
+           (expand-location location (:request state))
            :headers {"referrer" (pr/url (:request state))})
         (throw (IllegalArgumentException. "Previous response was not a redirect")))))
