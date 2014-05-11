@@ -61,7 +61,7 @@
                                                 (get-host request)))
                          (merge (:headers env))))
         (set-content-type content-type)
-        (add-env (dissoc (dissoc env :params) :headers))
+        (add-env (dissoc env :headers))
         (update-in [:body] to-input-stream)
         set-post-content-type
         set-https-port)))
