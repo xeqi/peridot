@@ -22,14 +22,14 @@
         (#(is (= (:status (:response %))
                  200)
               "request returns session with response")))
-      (request "/" :params {"foo" "bar"
-                            "zoo" "car"})
+      (request "/" :params (sorted-map "foo" "bar"
+                                       "zoo" "car"))
       (doto
           (#(is (= (:query-string (:request %))
                    "foo=bar&zoo=car")
                 "request sends params")))
-      (request "/" :params {:foo "bar"
-                            :zoo "car"})
+      (request "/" :params (sorted-map :foo "bar"
+                                       :zoo "car"))
       (doto
           (#(is (= (:query-string (:request %))
                    "foo=bar&zoo=car")
