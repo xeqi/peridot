@@ -7,7 +7,7 @@
   :dependencies [[org.clojure/clojure "1.3.0"]
                  [ring-mock "0.1.5"]
                  [org.clojure/data.codec "0.1.0"]
-                 [org.apache.httpcomponents/httpmime "4.1.3"
+                 [org.apache.httpcomponents/httpmime "4.3.5"
                   :exclusions [commons-logging]]
                  [clj-time "0.5.1"]]
   :profiles {:dev {:dependencies [[net.cgrand/moustache "1.1.0"
