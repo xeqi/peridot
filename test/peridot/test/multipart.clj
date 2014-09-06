@@ -11,11 +11,15 @@
   (is (not (multipart/multipart? {"file" "value"}))))
 
 (deftest uploading-a-file
-  (let [req (:request (-> (session (constantly (response/response "ok")))
-                          (request "/"
-                                   :request-method :post
-                                   :params {"file" (io/file (io/resource
-                                                             "file.txt"))})))]
+  (let [req (:request (->
+                       (response/response "ok")
+                       (multiparams/wrap-multipart-params)
+                       (constantly)
+                       (session)
+                       (request "/"
+                                :request-method :post
+                                :params {"file" (io/file (io/resource
+                                                          "file.txt"))})))]
     (is (re-find #"multipart/form-data;"
                  (:content-type req))
         "files should set content-type to multipart/form-data")
