@@ -7,15 +7,15 @@
   :dependencies [[org.clojure/clojure "1.3.0"]
                  [ring-mock "0.1.5"]
                  [org.clojure/data.codec "0.1.0"]
-                 [org.apache.httpcomponents/httpmime "4.1.3"
+                 [org.apache.httpcomponents/httpmime "4.3.5"
                   :exclusions [commons-logging]]
                  [clj-time "0.5.1"]]
-  :profiles {:test {:dependencies [[net.cgrand/moustache "1.1.0"
-                                    :exclusions
-                                    [[org.clojure/clojure]
-                                     [ring/ring-core]]]
-                                   [ring/ring-core "1.1.8"]]
-                    :resource-paths ["test-resources"]}
+  :profiles {:dev {:dependencies [[net.cgrand/moustache "1.1.0"
+                                   :exclusions
+                                   [[org.clojure/clojure]
+                                    [ring/ring-core]]]
+                                  [ring/ring-core "1.1.8"]]
+                   :resource-paths ["test-resources"]}
              :1.4 {:dependencies [[org.clojure/clojure "1.4.0"]]}
              :1.5 {:dependencies [[org.clojure/clojure "1.5.1"]]}
              :1.6 {:dependencies [[org.clojure/clojure "1.6.0"]]}}
