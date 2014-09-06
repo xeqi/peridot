@@ -3,6 +3,7 @@
         [clojure.test])
   (:require [peridot.multipart :as multipart]
             [ring.util.response :as response]
+            [ring.middleware.multipart-params :refer [wrap-multipart-params] :as multiparams]
             [clojure.java.io :as io]))
 
 (deftest file-as-param-is-multipart
