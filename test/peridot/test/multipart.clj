@@ -26,7 +26,9 @@
     (is (re-find #"multipart/form-data;"
                  (get-in req [:headers "content-type"]))
         "files should set content-type header to multipart/form-data")
-    (is (re-find #"hi from file\n" (slurp (:body req))))))
+    (is (re-find #"hi from file\n" (slurp (:body req))))
+    (is (= #{:size :filename :content-type :tempfile}
+           (set (keys ((:multipart-params req) "file")))))))
 
 (deftest uploading-a-file-with-keyword-keys
   (let [req (:request (-> (session (constantly (response/response "ok")))
