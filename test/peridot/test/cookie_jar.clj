@@ -17,6 +17,12 @@
                 {k (merge {:value v} (f k v))})
               (seq m))))
 
+(def expired-date
+  (.format (first cj/cookie-date-formats) (java.util.Date. 0)))
+
+(defn expire-cookie [m]
+  (assoc m :expires expired-date :value ""))
+
 (def app
   (params/wrap-params
    (cookies/wrap-cookies
@@ -42,7 +48,8 @@
      ["delete"]
      {:get (fn [req]
              (assoc (response/response "ok")
-               :cookies {}))}
+               :cookies (into {} (for [[k v] (:cookies req)]
+                                   [k (expire-cookie v)]))))}
      ["set-secure"]
      {:get (fn [req]
              (assoc (response/response "ok")

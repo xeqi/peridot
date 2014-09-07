@@ -58,12 +58,10 @@
 
 (defn merge-cookies [headers cookie-jar uri host]
   (let [cookie-string (get headers "Set-Cookie")]
-    (if cookie-string
-      (if (empty? cookie-string)
-        (dissoc cookie-jar host)
-        (update-in cookie-jar [host] merge
-                   (into {} (map #(build-cookie % uri host) cookie-string))))
-      cookie-jar)))
+    (if (empty? cookie-string)
+      cookie-jar
+      (update-in cookie-jar [host] merge
+                 (into {} (map #(build-cookie % uri host) cookie-string))))))
 
 (defn cookies-for [cookie-jar scheme uri host]
   (let [cookie-string
