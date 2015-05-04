@@ -152,9 +152,9 @@
         (#(is (= (:body (:response %))
                  "You've been redirected")
               "follow redirect should have correct body"))
-        (#(is (= (get (:headers (:request %)) "referrer")
+        (#(is (= (get (:headers (:request %)) "referer")
                  "http://localhost/redirect")
-              "follow redirect should set referrer")))
+              "follow redirect should set referrer with official spelling")))
       (request "/redirect" :params {"bar" "foo"})
       (follow-redirect)
       (doto

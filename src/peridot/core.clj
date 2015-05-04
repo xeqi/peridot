@@ -56,5 +56,5 @@
     (if location
         (request state
            (expand-location location (:request state))
-           :headers {"referrer" (pr/url (:request state))})
+           :headers {"referer" (pr/url (:request state))})
         (throw (IllegalArgumentException. "Previous response was not a redirect")))))
