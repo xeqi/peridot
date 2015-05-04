@@ -82,11 +82,23 @@
               "request body can send lists of params")))
       (request "/"
                :request-method :post
-               :content-type "application/xml")
+               :content-type "application/xml"
+               :body "<?<?xml version=\"1.0\" encoding=\"UTF-8\"?><root />")
       (doto
           (#(is (= (:content-type (:request %))
                    "application/xml")
-           "request does not override the content-type")))))
+           "request does not override the content-type")))
+      (request "/"
+               :request-method :post
+               :content-type "application/edn"
+               :body (pr-str {:a {:b 'c}}))
+      (doto
+        (#(is (= (:content-type (:request %))
+                 "application/edn")
+              "request does not override the content-type"))
+        (#(is (= (read-string (slurp (:body (:request %))))
+                 {:a {:b 'c}})
+              "request body remains intact")))))
 
 (deftest request-https
   (-> (session app)
