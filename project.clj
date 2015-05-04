@@ -15,7 +15,8 @@
                                     :exclusions
                                     [[org.clojure/clojure]
                                      [ring/ring-core]]]
-                                   [ring/ring-core "1.1.8"]
+                                   [ring/ring-core "1.3.2"]
+                                   [javax.servlet/servlet-api "2.5"]
                                    ;; use 1.6 for development
                                    ;; cider requires it
                                    ^:replace [org.clojure/clojure "1.6.0"]]
