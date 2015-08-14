@@ -4,6 +4,8 @@ peridot is an interaction library for [ring](https://github.com/ring-clojure/rin
 
 ## Dependency Information
 
+[![Clojars Project](http://clojars.org/peridot/latest-version.svg)](http://clojars.org/peridot)
+
 peridot's latest version and information on how to install it is available from [clojars](http://clojars.org/peridot).
 
 ## Usage
