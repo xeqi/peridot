@@ -47,6 +47,15 @@ peridot will not follow redirects automatically.  To follow a redirect use ```fo
     (follow-redirect))
 ```
 
+By default, when `POST`ing data, params will be encoded as `application/x-www-form-urlencoded`. If you want to use an alternative encoding, you can pass `:content-type` as an option, and use `:body` instead of `:params`.
+
+```clojure
+(-> (session ring-app) ;Use your ring app
+    (request "/login" :request-method :post
+                      :content-type "application/xml"
+                      :body "<?<?xml version=\"1.0\" encoding=\"UTF-8\"?><root />"))
+```
+
 ### Cookies
 
 peridot will manage cookies through the threading.  This allows you to login and perform actions as that user.
