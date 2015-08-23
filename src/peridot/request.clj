@@ -45,8 +45,7 @@
     request))
 
 (defn build [uri env headers cookie-jar content-type]
-  (let [env (apply hash-map env)
-        params (:params env)
+  (let [params (:params env)
         method (:request-method env :get)
         request (if (multipart/multipart? params)
                   (merge-with merge

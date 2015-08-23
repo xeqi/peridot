@@ -11,7 +11,9 @@
 (defn request
   "Send a request to the ring app, returns state containing :response and :request sent to and returned from the ring app."
   [{:keys [app headers cookie-jar content-type]} uri & env]
-  (let [request (pr/build uri env headers cookie-jar content-type)
+  (let [env (apply hash-map env)
+        content-type (or (:content-type env) content-type)
+        request (pr/build uri env headers cookie-jar content-type)
         response (app request)]
     (session app
              :response response
@@ -38,8 +40,8 @@
   [state user pass]
   (header state "authorization" (str "Basic "
                                      (String. (base64/encode
-                                               (.getBytes (str user ":" pass)
-                                                          "UTF-8"))
+                                                (.getBytes (str user ":" pass)
+                                                           "UTF-8"))
                                               "UTF-8"))))
 (defn- expand-location
   "Expand a location header into an absolute url"
@@ -54,7 +56,7 @@
   (let [headers (:headers (:response state))
         location (when headers (headers "Location"))]
     (if location
-        (request state
-           (expand-location location (:request state))
-           :headers {"referer" (pr/url (:request state))})
-        (throw (IllegalArgumentException. "Previous response was not a redirect")))))
+      (request state
+               (expand-location location (:request state))
+               :headers {"referer" (pr/url (:request state))})
+      (throw (IllegalArgumentException. "Previous response was not a redirect")))))
