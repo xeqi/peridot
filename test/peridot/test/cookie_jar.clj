@@ -2,7 +2,8 @@
   (:import java.util.Date)
   (:use [peridot.core]
         [clojure.test])
-  (:require [peridot.cookie-jar :as cj]
+  (:require [clojure.string :as str]
+            [peridot.cookie-jar :as cj]
             [net.cgrand.moustache :as moustache]
             [ring.util.response :as response]
             [ring.util.codec :as codec]
@@ -23,142 +24,147 @@
 (defn expire-cookie [m]
   (assoc m :expires expired-date :value ""))
 
+(defn cookie-set
+  "Given a cookie header string, split into a set of cookie name=val strings"
+  [string]
+  (into #{} (str/split string #";")))
+
 (def app
   (params/wrap-params
-   (cookies/wrap-cookies
-    (moustache/app
-     ["expirable" "set"]
-     {:get (fn [req]
-             (assoc (response/response "ok")
-               :cookies
-               (cookies-from-map (:params req)
-                                 (fn [k v] {:expires v}))))}
-     ["cookies" "set"]
-     {:get (fn [req]
-             (assoc (response/response "ok")
-               :cookies
-               (cookies-from-map (:params req)
-                                 (constantly {}))))}
-     ["set"]
-     {:get (fn [req]
-             (assoc (response/response "ok")
-               :cookies
-               (cookies-from-map (:params req)
-                                 (constantly {}))))}
-     ["delete"]
-     {:get (fn [req]
-             (assoc (response/response "ok")
-               :cookies (into {} (for [[k v] (:cookies req)]
-                                   [k (expire-cookie v)]))))}
-     ["set-secure"]
-     {:get (fn [req]
-             (assoc (response/response "ok")
-               :cookies
-               (cookies-from-map (:params req)
-                                 (constantly {:secure true}))))}
-     ["set-http-only"]
-     {:get (fn [req]
-             (assoc (response/response "ok")
-               :cookies
-               (cookies-from-map (:params req)
-                                 (constantly {:http-only true}))))}
-     ["default-path"]
-     {:get (fn [req]
-             (let [resp (response/response "ok")]
-               (if (not (empty? (:params req)))
-                 (assoc resp
-                   :cookies
-                   (cookies-from-map (:params req)
-                                     (constantly {})))
-                 resp)))}))))
+    (cookies/wrap-cookies
+      (moustache/app
+        ["expirable" "set"]
+        {:get (fn [req]
+                (assoc (response/response "ok")
+                  :cookies
+                  (cookies-from-map (:params req)
+                                    (fn [k v] {:expires v}))))}
+        ["cookies" "set"]
+        {:get (fn [req]
+                (assoc (response/response "ok")
+                  :cookies
+                  (cookies-from-map (:params req)
+                                    (constantly {}))))}
+        ["set"]
+        {:get (fn [req]
+                (assoc (response/response "ok")
+                  :cookies
+                  (cookies-from-map (:params req)
+                                    (constantly {}))))}
+        ["delete"]
+        {:get (fn [req]
+                (assoc (response/response "ok")
+                  :cookies (into {} (for [[k v] (:cookies req)]
+                                      [k (expire-cookie v)]))))}
+        ["set-secure"]
+        {:get (fn [req]
+                (assoc (response/response "ok")
+                  :cookies
+                  (cookies-from-map (:params req)
+                                    (constantly {:secure true}))))}
+        ["set-http-only"]
+        {:get (fn [req]
+                (assoc (response/response "ok")
+                  :cookies
+                  (cookies-from-map (:params req)
+                                    (constantly {:http-only true}))))}
+        ["default-path"]
+        {:get (fn [req]
+                (let [resp (response/response "ok")]
+                  (if (not (empty? (:params req)))
+                    (assoc resp
+                      :cookies
+                      (cookies-from-map (:params req)
+                                        (constantly {})))
+                    resp)))}))))
 
 (deftest cookies-keep-a-cookie-jar
   (-> (session app)
       (request "/show")
       (doto
-          (#(is (nil? (get (:headers (:request %)) "cookie"))
-                "cookies should be empty for new session")))
+        (#(is (nil? (get (:headers (:request %)) "cookie"))
+              "cookies should be empty for new session")))
       (request "/set" :params {"value" "1"})
       (request "/show")
       (doto
-          (#(is (= (get (:headers (:request %)) "cookie")
-                   "value=1")
-                "cookies should be saved and sent back")))
+        (#(is (= (get (:headers (:request %)) "cookie")
+                 "value=1")
+              "cookies should be saved and sent back")))
       (request "/show")
       (doto
-          (#(is (= (get (:headers (:request %)) "cookie")
-                   "value=1")
-                "old cookies should be saved when no cookies are send back")))
+        (#(is (= (get (:headers (:request %)) "cookie")
+                 "value=1")
+              "old cookies should be saved when no cookies are send back")))
       (request "/set" :params {"VALUE" "2"})
       (request "/show")
       (doto
-          (#(is (= (get (:headers (:request %)) "cookie")
-                   "VALUE=2")
-                "cookies are case insensitive")))
+        (#(is (= (get (:headers (:request %)) "cookie")
+                 "VALUE=2")
+              "cookies are case insensitive")))
       (request "/delete")
       (request "/show")
       (doto
-          (#(is (nil? (get (:headers (:request %)) "cookie"))
-           "cookies can be deleted")))))
+        (#(is (nil? (get (:headers (:request %)) "cookie"))
+              "cookies can be deleted")))))
 
 (deftest cookie-jar-keeps-multiple-cookies-per-host
   (-> (session app)
       (request "/show")
       (doto
-          (#(is (nil? (get (:headers (:request %)) "cookie"))
-                "cookies should be empty for new session")))
+        (#(is (nil? (get (:headers (:request %)) "cookie"))
+              "cookies should be empty for new session")))
       (request "/set" :params {"value" "1"})
       (request "/show")
       (doto
-          (#(is (= (get (:headers (:request %)) "cookie")
-                   "value=1")
-                "first cookie should be saved and sent back")))
+        (#(is (= (get (:headers (:request %)) "cookie")
+                 "value=1")
+              "first cookie should be saved and sent back")))
       (request "/set" :params {"second-value" "2"})
       (request "/show")
       (doto
-          (#(is (= (get (:headers (:request %)) "cookie")
-                   "second-value=2;value=1")
-                "first and second cookie under same host should be stored and send back")))
+        (#(is (= (cookie-set (get-in % [:request :headers "cookie"]))
+                 #{"second-value=2" "value=1"})
+              "first and second cookie under same host should be stored and send back")))
       (request "/delete")
       (request "/show")
       (doto
-          (#(is (nil? (get (:headers (:request %)) "cookie"))
-           "all cookies under same host can be deleted")))))
+        (#(is (nil? (get (:headers (:request %)) "cookie"))
+              "all cookies under same host can be deleted")))))
 
 (deftest cookies-for-absolute-url
   (-> (session app)
       (request "http://www.example.com/set" :params {"value" "1"})
       (request "http://www.example.com/show")
       (doto
-          (#(is (= (get (:headers (:request %)) "cookie")
-                   "value=1")
-                "cookies should be saved and sent back for absolute url")))
+        (#(is (= (get (:headers (:request %)) "cookie")
+                 "value=1")
+              "cookies should be saved and sent back for absolute url")))
       (request "http://WWW.EXAMPLE.COM/show")
       (doto
-          (#(is (= (get (:headers (:request %)) "cookie")
-                   "value=1")
-                "cookies domain should be case insensitive")))
+        (#(is (= (get (:headers (:request %)) "cookie")
+                 "value=1")
+              "cookies domain should be case insensitive")))
       (request "http://www.other.example.com/show")
       (doto
-          (#(is (nil? (get (:headers (:request %)) "cookie"))
-                "cookies are not sent to other hosts")))
+        (#(is (nil? (get (:headers (:request %)) "cookie"))
+              "cookies are not sent to other hosts")))
       (request "http://www.example.com/show")
       (doto
-          (#(is (= (get (:headers (:request %)) "cookie")
-                   "value=1")
-                "cookies are sent to subdomains")))
+        (#(is (= (get (:headers (:request %)) "cookie")
+                 "value=1")
+              "cookies are sent to subdomains")))
       (request "http://example.com/set" :params {"value" "2"})
       (request "http://www.example.com/show")
       (doto
-          (#(is (= (get (:headers (:request %)) "cookie")
-                   "value=1")
-           "cookies are preferred to be more specific")))
+        (#(is (= (get (:headers (:request %)) "cookie")
+                 "value=1")
+              "cookies are preferred to be more specific")))
       (request "http://www.example.com/set" :params {"value" "3"})
       (request "http://www.example.com/show")
       (doto
-          (#(is (= (get (:headers (:request %)) "cookie")
-                   "value=3")
-           "cookies ordering does not matter for specificity")))))
+        (#(is (= (get (:headers (:request %)) "cookie")
+                 "value=3")
+              "cookies ordering does not matter for specificity")))))
 
 (deftest cookie-expires
   (let [hour-ago (t/from-now (t/hours -1))
@@ -170,8 +176,8 @@
         state (-> (session app)
                   (request "/expirable/set" :params params))]
     (-> state
-      (request "/expirable/show")
-      (doto
+        (request "/expirable/show")
+        (doto
           (#(is (nil? (get (:headers (:request %)) "cookie"))
                 "expired cookies should not be sent")))))
   (let [hour-ahead (t/from-now (t/hours 1))
@@ -182,8 +188,8 @@
         state (-> (session app)
                   (request "/expirable/set" :params params))]
     (-> state
-      (request "/expirable/show")
-      (doto
+        (request "/expirable/show")
+        (doto
           (#(is (= (get (:headers (:request %)) "cookie")
                    (format "rfc822=%s;rfc850=%s"
                            (codec/form-encode rfc822date)
@@ -195,22 +201,22 @@
       (request "/cookies/set" :params {"value" "1"})
       (request "/cookies/get")
       (doto
-          (#(is (= (get (:headers (:request %)) "cookie")
-                   "value=1")
-                "cookies without uri are sent to path up to last slash")))
+        (#(is (= (get (:headers (:request %)) "cookie")
+                 "value=1")
+              "cookies without uri are sent to path up to last slash")))
       (request "/no-cookies/show")
       (doto
-          (#(is (nil? (get (:headers (:request %)) "cookie"))
-                "cookies without uri are not sent to other pages")))
+        (#(is (nil? (get (:headers (:request %)) "cookie"))
+              "cookies without uri are not sent to other pages")))
       (request "/COOKIES/show")
       (doto
-          (#(is (nil? (get (:headers (:request %)) "cookie"))
-                "cookies treat path as case sensitive")))
+        (#(is (nil? (get (:headers (:request %)) "cookie"))
+              "cookies treat path as case sensitive")))
       (request "/cookies/further/get")
       (doto
-          (#(is (= (get (:headers (:request %)) "cookie")
-                   "value=1")
-                "cookies get sent to deeper paths")))))
+        (#(is (= (get (:headers (:request %)) "cookie")
+                 "value=1")
+              "cookies get sent to deeper paths")))))
 
 (deftest cookie-security
   (-> (session app)
@@ -218,23 +224,23 @@
                :params {"value" "1"})
       (request "http://example.com/get")
       (doto
-          (#(is (nil? (get (:headers (:request %)) "cookie"))
-                "secure cookies are not sent to http")))
+        (#(is (nil? (get (:headers (:request %)) "cookie"))
+              "secure cookies are not sent to http")))
       (request "https://example.com/get")
       (doto
-          (#(is (= (get (:headers (:request %)) "cookie")
-                   "value=1")
-                "secure cookies are sent"))))
+        (#(is (= (get (:headers (:request %)) "cookie")
+                 "value=1")
+              "secure cookies are sent"))))
   (-> (session app)
       (request "http://example.com/set-http-only"
                :params {"value" "1"})
       (request "https://example.com/get")
       (doto
-          (#(is (= (get (:headers (:request %)) "cookie")
-                   "value=1")
-                "http-only cookies are still sent to https")))
+        (#(is (= (get (:headers (:request %)) "cookie")
+                 "value=1")
+              "http-only cookies are still sent to https")))
       (request "http://example.com/get")
       (doto
-          (#(is (= (get (:headers (:request %)) "cookie")
-                   "value=1")
-                "http-only cookies are sent")))))
+        (#(is (= (get (:headers (:request %)) "cookie")
+                 "value=1")
+              "http-only cookies are sent")))))
