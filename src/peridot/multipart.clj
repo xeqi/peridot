@@ -3,8 +3,8 @@
   (:import org.apache.http.entity.mime.MultipartEntity
            org.apache.http.entity.mime.content.StringBody
            org.apache.http.entity.mime.content.FileBody
-           java.io.PipedOutputStream
-           java.io.PipedInputStream
+           org.apache.http.entity.ContentType
+           java.io.ByteArrayOutputStream
            java.io.File
            java.nio.charset.Charset
            javax.activation.FileTypeMap))
@@ -24,8 +24,9 @@
 (defmethod add-part File [m k f]
   (.addPart m
             (ensure-string k)
-            (FileBody. f (.getContentType (FileTypeMap/getDefaultFileTypeMap)
-                                          f))))
+            (FileBody. f (ContentType/create 
+                           (.getContentType (FileTypeMap/getDefaultFileTypeMap) f))
+                       (.getName f))))
 
 (defmethod add-part :default [m k v]
   (.addPart m
@@ -40,12 +41,13 @@
 
 (defn build [params]
   (let [mpe (entity params)]
-    {:body (let [in (PipedInputStream.)
-                 out (PipedOutputStream. in)]
-             (future (do (.writeTo mpe out)
-                         (.close out)))
-             in)
+     {:body (let [out (ByteArrayOutputStream.)]
+                        (.writeTo mpe out)
+                        (.close out)
+                        (.toString out))
+
      :content-length (.getContentLength mpe)
      :content-type (.getValue (.getContentType mpe))
      :headers {"content-type"  (.getValue (.getContentType mpe))
                "content-length" (str (.getContentLength mpe))}}))
+
