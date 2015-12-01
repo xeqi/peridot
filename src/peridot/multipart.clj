@@ -48,4 +48,4 @@
      :content-length (.getContentLength mpe)
      :content-type (.getValue (.getContentType mpe))
      :headers {"content-type"  (.getValue (.getContentType mpe))
-               "content-length" (.getContentLength mpe)}}))
+               "content-length" (str (.getContentLength mpe))}}))
