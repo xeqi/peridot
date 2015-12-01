@@ -3,6 +3,7 @@
   (:import org.apache.http.entity.mime.MultipartEntity
            org.apache.http.entity.mime.content.StringBody
            org.apache.http.entity.mime.content.FileBody
+           org.apache.http.entity.ContentType
            java.io.ByteArrayOutputStream
            java.io.File
            java.nio.charset.Charset
@@ -23,8 +24,9 @@
 (defmethod add-part File [m k f]
   (.addPart m
             (ensure-string k)
-            (FileBody. f (.getContentType (FileTypeMap/getDefaultFileTypeMap)
-                                          f))))
+            (FileBody. f (ContentType/create 
+                           (.getContentType (FileTypeMap/getDefaultFileTypeMap) f))
+                       (.getName f))))
 
 (defmethod add-part :default [m k v]
   (.addPart m
