@@ -1,4 +1,4 @@
-(defproject peridot "0.4.1"
+(defproject peridot "0.4.2"
   :description "Interact with ring apps"
   :url "https://github.com/xeqi/peridot"
   :min-lein-version "2.0.0"
