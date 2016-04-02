@@ -6,6 +6,14 @@
             [ring.util.response :as response]
             [clojure.java.io :as io]))
 
+(def expected-content-type
+  (let [[a b] (map #(Integer. %)
+                   (clojure.string/split (System/getProperty "java.specification.version") #"\."))]
+    (if (and (<= 1 a)
+             (<= 8 b))
+      "text/plain" ; Java 1.8 and above
+      "application/octet-stream"))) ; Java 1.7 and below
+
 (deftest file-as-param-is-multipart
   (is (multipart/multipart? {"file" (io/file (io/resource "file.txt"))}))
   (is (not (multipart/multipart? {"file" "value"}))))
@@ -28,8 +36,7 @@
           (get-in res [:multipart-params "file"])]
       (is (= size 13))
       (is (= filename "file.txt"))
-      ;; TODO should this be text content type?
-      (is (= content-type "application/octet-stream"))
+      (is (= content-type expected-content-type))
       (is (= (slurp tempfile) (slurp file))))))
 
 (deftest uploading-a-file-with-keyword-keys
@@ -43,8 +50,7 @@
           (get-in res [:multipart-params "file"])]
       (is (= size 13))
       (is (= filename "file.txt"))
-      ;; TODO should this be text content type?
-      (is (= content-type "application/octet-stream"))
+      (is (= content-type expected-content-type))
       (is (= (slurp tempfile) (slurp file))))))
 
 (deftest uploading-a-file-with-params
@@ -59,8 +65,7 @@
           (get-in res [:multipart-params "file"])]
       (is (= size 13))
       (is (= filename "file.txt"))
-      ;; TODO should this be text content type?
-      (is (= content-type "application/octet-stream"))
+      (is (= content-type expected-content-type))
       (is (= (slurp tempfile) (slurp file))))
     (is (= (get-in res [:multipart-params "something"])
            "☃"))))
