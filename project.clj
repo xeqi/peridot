@@ -19,14 +19,14 @@
                                      [ring/ring-core]]]
                                    [ring/ring-core "1.3.2"]
                                    [javax.servlet/servlet-api "2.5"]
-                                   ;; use 1.6 for development
-                                   ;; cider requires it
-                                   ^:replace [org.clojure/clojure "1.6.0"]]
+                                   ;; use 1.8 for development
+                                   ^:replace [org.clojure/clojure "1.8.0"]]
                     :resource-paths ["test-resources"]}
              ;; use the relevant clojure version for testing
              :1.3 {:dependencies [^:replace [org.clojure/clojure "1.3.0"]]}
              :1.4 {:dependencies [^:replace [org.clojure/clojure "1.4.0"]]}
              :1.5 {:dependencies [^:replace [org.clojure/clojure "1.5.1"]]}
              :1.6 {:dependencies [^:replace [org.clojure/clojure "1.6.0"]]}
-             :1.7 {:dependencies [^:replace [org.clojure/clojure "1.7.0"]]}}
-  :aliases {"all" ["with-profile" "+1.3:+1.4:+1.5:+1.6:+1.7"]})
+             :1.7 {:dependencies [^:replace [org.clojure/clojure "1.7.0"]]}
+             :1.8 {:dependencies [^:replace [org.clojure/clojure "1.8.0"]]}}
+  :aliases {"all" ["with-profile" "+1.3:+1.4:+1.5:+1.6:+1.7:+1.8"]})
