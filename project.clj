@@ -8,7 +8,7 @@
                  [org.clojure/clojure "1.3.0"]
                  [ring-mock "0.1.5"]
                  [org.clojure/data.codec "0.1.0"]
-                 [org.apache.httpcomponents/httpmime "4.3"
+                 [org.apache.httpcomponents/httpmime "4.5.1"
                   :exclusions [commons-logging]]
                  [org.apache.httpcomponents/httpcore "4.4.4"]
                  [clj-time "0.11.0"]]
