@@ -17,7 +17,7 @@
                                     :exclusions
                                     [[org.clojure/clojure]
                                      [ring/ring-core]]]
-                                   [ring/ring-core "1.3.2"]
+                                   [ring/ring-core "1.4.0"]
                                    [javax.servlet/servlet-api "2.5"]
                                    ;; use 1.8 for development
                                    ^:replace [org.clojure/clojure "1.8.0"]]
