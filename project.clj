@@ -8,23 +8,27 @@
                  [org.clojure/clojure "1.3.0"]
                  [ring-mock "0.1.5"]
                  [org.clojure/data.codec "0.1.0"]
-                 [org.apache.httpcomponents/httpmime "4.3"
+                 [org.apache.httpcomponents/httpmime "4.5.1"
                   :exclusions [commons-logging]]
-                 [org.apache.httpcomponents/httpcore "4.4"]
-                 [clj-time "0.9.0"]]
+                 [org.apache.httpcomponents/httpcore "4.4.4"]
+                 [clj-time "0.11.0"]]
 
   :profiles {:dev {:dependencies [[net.cgrand/moustache "1.1.0"
                                     :exclusions
                                     [[org.clojure/clojure]
                                      [ring/ring-core]]]
-                                   [ring/ring-core "1.3.2"]
+                                   [ring/ring-core "1.4.0"]
                                    [javax.servlet/servlet-api "2.5"]
                                    ;; use 1.8 for development
                                    ^:replace [org.clojure/clojure "1.8.0"]]
                     :resource-paths ["test-resources"]}
              ;; use the relevant clojure version for testing
-             :1.3 {:dependencies [^:replace [org.clojure/clojure "1.3.0"]]}
-             :1.4 {:dependencies [^:replace [org.clojure/clojure "1.4.0"]]}
+             :1.3 {:dependencies [^:replace [org.clojure/clojure "1.3.0"]
+                                  ^:replace [clj-time "0.9.0"]
+                                  ^:replace [ring/ring-core "1.3.2"]]}
+             :1.4 {:dependencies [^:replace [org.clojure/clojure "1.4.0"]
+                                  ^:replace [clj-time "0.9.0"]
+                                  ^:replace [ring/ring-core "1.3.2"]]}
              :1.5 {:dependencies [^:replace [org.clojure/clojure "1.5.1"]]}
              :1.6 {:dependencies [^:replace [org.clojure/clojure "1.6.0"]]}
              :1.7 {:dependencies [^:replace [org.clojure/clojure "1.7.0"]]}
