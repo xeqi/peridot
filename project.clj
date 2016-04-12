@@ -10,7 +10,7 @@
                  [org.clojure/data.codec "0.1.0"]
                  [org.apache.httpcomponents/httpmime "4.3"
                   :exclusions [commons-logging]]
-                 [org.apache.httpcomponents/httpcore "4.4"]
+                 [org.apache.httpcomponents/httpcore "4.4.4"]
                  [clj-time "0.9.0"]]
 
   :profiles {:dev {:dependencies [[net.cgrand/moustache "1.1.0"
