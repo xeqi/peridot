@@ -21,7 +21,7 @@
 (defmulti add-part
   (fn [multipartentity key value] (type value)))
 
-(defmethod add-part File [m k f]
+(defmethod add-part File [m k ^File f]
   (.addPart m
             (ensure-string k)
             (FileBody. f (ContentType/create 
@@ -40,7 +40,7 @@
     mpe))
 
 (defn build [params]
-  (let [mpe (entity params)]
+  (let [^MultipartEntity mpe (entity params)]
      {:body (let [out (ByteArrayOutputStream.)]
                         (.writeTo mpe out)
                         (.close out)

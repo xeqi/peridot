@@ -9,7 +9,7 @@
 (defmulti to-input-stream class)
 
 (defmethod to-input-stream nil [_] nil)
-(defmethod to-input-stream String [s] (-> s .getBytes ByteArrayInputStream.))
+(defmethod to-input-stream String [^String s] (ByteArrayInputStream. (.getBytes s)))
 (defmethod to-input-stream :default [x] (io/input-stream x))
 
 (defn get-host [request]
