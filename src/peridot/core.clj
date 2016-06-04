@@ -39,9 +39,9 @@
   "Set basic autorization to be used in future requests."
   [state user pass]
   (header state "authorization" (str "Basic "
-                                     (String. (base64/encode
-                                                (.getBytes (str user ":" pass)
-                                                           "UTF-8"))
+                                     (String. ^"[B" (base64/encode
+                                                      (.getBytes (str user ":" pass)
+                                                                 "UTF-8"))
                                               "UTF-8"))))
 (defn- expand-location
   "Expand a location header into an absolute url"

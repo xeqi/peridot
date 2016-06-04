@@ -2,7 +2,8 @@
   (:import java.text.SimpleDateFormat
            java.text.ParseException
            java.lang.RuntimeException
-           java.util.Date)
+           java.util.Date
+           (java.text DateFormat))
   (:require [clojure.string :as string]
             [clj-time.core :as t]
             [clj-time.format :as tf]))
@@ -14,9 +15,9 @@
 
 (defn ^:private parse-date
   "Try valid HTTP date formats until we get a date"
-  [date]
+  [^String date]
   (or (some
-        (fn [format]
+        (fn [^DateFormat format]
           (try
             (.parse format date)
             ; Clojure 1.3 wraps the ParseException in a RuntimeException

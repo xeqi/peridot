@@ -1,5 +1,6 @@
 (ns peridot.test.cookie-jar
-  (:import java.util.Date)
+  (:import java.util.Date
+           (java.text DateFormat))
   (:use [peridot.core]
         [clojure.test])
   (:require [clojure.string :as str]
@@ -19,7 +20,7 @@
               (seq m))))
 
 (def expired-date
-  (.format (first cj/cookie-date-formats) (java.util.Date. 0)))
+  (.format ^DateFormat (first cj/cookie-date-formats) (Date. 0)))
 
 (defn expire-cookie [m]
   (assoc m :expires expired-date :value ""))
@@ -169,12 +170,12 @@
 (deftest cookie-expires
   (let [hour-ago (t/from-now (t/hours -1))
         ; See http://tools.ietf.org/html/rfc2616#section-3.3.1
-        params {"rfc822" (tf/unparse (:rfc822 tf/formatters) hour-ago)
-                "rfc850" (tf/unparse
-                           (tf/formatter "EEEE, dd-MMM-yy HH:mm:ss z")
-                           hour-ago)}
-        state (-> (session app)
-                  (request "/expirable/set" :params params))]
+        params   {"rfc822" (tf/unparse (:rfc822 tf/formatters) hour-ago)
+                  "rfc850" (tf/unparse
+                             (tf/formatter "EEEE, dd-MMM-yy HH:mm:ss z")
+                             hour-ago)}
+        state    (-> (session app)
+                     (request "/expirable/set" :params params))]
     (-> state
         (request "/expirable/show")
         (doto
@@ -184,9 +185,9 @@
         rfc822date (tf/unparse (:rfc822 tf/formatters) hour-ahead)
         rfc850date (tf/unparse (tf/formatter "EEEE, dd-MMM-yy HH:mm:ss z")
                                hour-ahead)
-        params {"rfc822" rfc822date, "rfc850" rfc850date}
-        state (-> (session app)
-                  (request "/expirable/set" :params params))]
+        params     {"rfc822" rfc822date, "rfc850" rfc850date}
+        state      (-> (session app)
+                       (request "/expirable/set" :params params))]
     (-> state
         (request "/expirable/show")
         (doto
