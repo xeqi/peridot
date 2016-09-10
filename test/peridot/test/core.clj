@@ -216,6 +216,10 @@
       (doto
         (#(is (= (:content-type (:request %)) "application/xml")
               "content-type is overwritten by the request")))
+      (request "/")
+      (doto
+        (#(is (= (:content-type (:request %)) "application/json")
+              "request content-type is for that request only")))
       (content-type "text/plain")
       (request "/")
       (doto

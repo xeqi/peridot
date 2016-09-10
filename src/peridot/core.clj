@@ -12,8 +12,8 @@
   "Send a request to the ring app, returns state containing :response and :request sent to and returned from the ring app."
   [{:keys [app headers cookie-jar content-type]} uri & env]
   (let [env (apply hash-map env)
-        content-type (or (:content-type env) content-type)
-        request (pr/build uri env headers cookie-jar content-type)
+        request-content-type (or (:content-type env) content-type)
+        request (pr/build uri env headers cookie-jar request-content-type)
         response (app request)]
     (session app
              :response response
