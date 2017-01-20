@@ -1,6 +1,6 @@
 (ns peridot.test.cookie-jar
-  (:import java.util.Date
-           (java.text DateFormat))
+  (:import (java.text DateFormat)
+           (java.util Date Locale))
   (:use [peridot.core]
         [clojure.test])
   (:require [clojure.string :as str]
@@ -172,7 +172,7 @@
         ; See http://tools.ietf.org/html/rfc2616#section-3.3.1
         params   {"rfc822" (tf/unparse (:rfc822 tf/formatters) hour-ago)
                   "rfc850" (tf/unparse
-                             (tf/formatter "EEEE, dd-MMM-yy HH:mm:ss z")
+                             (tf/with-locale (tf/formatter "EEEE, dd-MMM-yy HH:mm:ss z") Locale/US)
                              hour-ago)}
         state    (-> (session app)
                      (request "/expirable/set" :params params))]
@@ -183,7 +183,7 @@
                 "expired cookies should not be sent")))))
   (let [hour-ahead (t/from-now (t/hours 1))
         rfc822date (tf/unparse (:rfc822 tf/formatters) hour-ahead)
-        rfc850date (tf/unparse (tf/formatter "EEEE, dd-MMM-yy HH:mm:ss z")
+        rfc850date (tf/unparse (tf/with-locale (tf/formatter "EEEE, dd-MMM-yy HH:mm:ss z") Locale/US)
                                hour-ahead)
         params     {"rfc822" rfc822date, "rfc850" rfc850date}
         state      (-> (session app)
