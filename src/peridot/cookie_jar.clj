@@ -2,14 +2,14 @@
   (:import java.text.SimpleDateFormat
            java.text.ParseException
            java.lang.RuntimeException
-           java.util.Date
-           (java.text DateFormat))
+           (java.text DateFormat)
+           (java.util Date Locale))
   (:require [clojure.string :as string]
             [clj-time.core :as t]
             [clj-time.format :as tf]))
 
 (def cookie-date-formats
-  (map #(SimpleDateFormat. %)
+  (map #(SimpleDateFormat. % Locale/US)
        ["EEE, dd MMM yyyy HH:mm:ss z"
         "EEEE, dd-MMM-yy HH:mm:ss z"]))
 
