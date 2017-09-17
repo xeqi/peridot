@@ -3,7 +3,8 @@
             [peridot.cookie-jar :as cj]
             [clojure.string :as string]
             [clojure.java.io :as io]
-            [ring.mock.request :as mock])
+            [ring.mock.request :as mock]
+            [ring.util.response :as rur])
   (:import java.io.ByteArrayInputStream))
 
 (defmulti to-input-stream class)
@@ -13,7 +14,7 @@
 (defmethod to-input-stream :default [x] (io/input-stream x))
 
 (defn get-host [request]
-  (string/lower-case (get (:headers request) "host")))
+  (string/lower-case (rur/get-header request "host")))
 
 (defn set-post-content-type [request]
   (if (and (not (:content-type request))

@@ -1,7 +1,8 @@
 (ns peridot.core
   (:require [peridot.request :as pr]
             [peridot.cookie-jar :as pcj]
-            [clojure.data.codec.base64 :as base64]))
+            [clojure.data.codec.base64 :as base64]
+            [ring.util.response :as rur]))
 
 (defn session
   "Creates an initial state for passing through the api."
@@ -53,10 +54,8 @@
 (defn follow-redirect
   "Follow the redirect from the previous response."
   [state]
-  (let [headers (:headers (:response state))
-        location (when headers (headers "Location"))]
-    (if location
-      (request state
-               (expand-location location (:request state))
-               :headers {"referer" (pr/url (:request state))})
-      (throw (IllegalArgumentException. "Previous response was not a redirect")))))
+  (if-let [location (rur/get-header (:response state) "Location")]
+    (request state
+             (expand-location location (:request state))
+             :headers {"referer" (pr/url (:request state))})
+    (throw (IllegalArgumentException. "Previous response was not a redirect"))))

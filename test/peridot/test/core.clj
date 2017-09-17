@@ -10,6 +10,14 @@
                                       (response/redirect "/redirected"))}
                  ["redirected"] {:get "You've been redirected"}))
 
+(def app-lowercase-header
+  "Same as app, but headers are lowercase instead of titlecase."
+  (moustache/app [""] {:get ""}
+                 ["redirect"] {:get (constantly {:status  302
+                                                 :body    ""
+                                                 :headers {"location" "/redirected"}})}
+                 ["redirected"] {:get "You've been redirected"}))
+
 (defn vhost-app [req]
   (condp = (:server-name req)
     "example.com" (app req)
@@ -158,6 +166,26 @@
 
 (deftest follow-redirect-generic
   (-> (session app)
+      (request "/redirect")
+      (follow-redirect)
+      (doto
+        (#(is (= (:status (:response %))
+                 200)
+              "follow redirect should follow"))
+        (#(is (= (:body (:response %))
+                 "You've been redirected")
+              "follow redirect should have correct body"))
+        (#(is (= (get (:headers (:request %)) "referer")
+                 "http://localhost/redirect")
+              "follow redirect should set referrer with official spelling")))
+      (request "/redirect" :params {"bar" "foo"})
+      (follow-redirect)
+      (doto
+        (#(is (nil? (:params (:response %)))
+              "follow redirect should not keep params")))))
+
+(deftest follow-redirect-lowercase-headers
+  (-> (session app-lowercase-header)
       (request "/redirect")
       (follow-redirect)
       (doto

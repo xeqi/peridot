@@ -6,7 +6,8 @@
            (java.util Date Locale))
   (:require [clojure.string :as string]
             [clj-time.core :as t]
-            [clj-time.format :as tf]))
+            [clj-time.format :as tf]
+            [ring.util.response :as rur]))
 
 (def cookie-date-formats
   (map #(SimpleDateFormat. % Locale/US)
@@ -58,7 +59,7 @@
   (assoc cookie-jar  k v))
 
 (defn merge-cookies [headers cookie-jar uri host]
-  (let [cookie-string (get headers "Set-Cookie")]
+  (let [cookie-string (rur/get-header {:headers headers} "Set-Cookie")]
     (if (empty? cookie-string)
       cookie-jar
       (update-in cookie-jar [host] merge
