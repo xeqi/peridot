@@ -7,7 +7,7 @@
             [clojure.java.io :as io]))
 
 (def expected-content-type
-  (let [[a b] (map #(Integer. %)
+  (let [[a b] (map #(Integer. ^String %)
                    (clojure.string/split (System/getProperty "java.specification.version") #"\."))]
     (if (and (<= 1 a)
              (<= 8 b))
