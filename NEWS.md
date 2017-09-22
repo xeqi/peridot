@@ -1,4 +1,4 @@
-## Unreleased
+## 0.5.0 / 2017-09-23
 
 * Search headers case insensitively. [#40](https://github.com/xeqi/peridot/pull/40)
 * Drop support for Clojure 1.3 and 1.4. It appears that there was already a latent problem with Java 8 and 1.3/1.4, but it wasn't detected because CI was running against Java 7. [#41](https://github.com/xeqi/peridot/pull/41)
