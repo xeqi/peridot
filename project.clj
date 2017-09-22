@@ -1,4 +1,4 @@
-(defproject peridot "0.5.0-SNAPSHOT"
+(defproject peridot "0.5.0"
   :description "Interact with ring apps"
   :url "https://github.com/xeqi/peridot"
   :min-lein-version "2.0.0"
@@ -17,7 +17,7 @@
                   ["change" "version" "leiningen.release/bump-version" "release"]
                   ["vcs" "commit"]
                   ["vcs" "tag" "v"]
-                  ["deploy"]
+                  ["deploy" "clojars"]
                   ["change" "version" "leiningen.release/bump-version"]
                   ["vcs" "commit"]
                   ["vcs" "push"]]
