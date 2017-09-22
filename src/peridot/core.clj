@@ -37,7 +37,7 @@
   (assoc state :content-type value))
 
 (defn authorize
-  "Set basic autorization to be used in future requests."
+  "Set basic authorization to be used in future requests."
   [state user pass]
   (header state "authorization" (str "Basic "
                                      (String. ^"[B" (base64/encode
