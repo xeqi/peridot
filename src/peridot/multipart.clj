@@ -1,6 +1,6 @@
 (ns peridot.multipart
   (:require [ring.util.codec :as codec])
-  (:import org.apache.http.entity.mime.MultipartEntity
+  (:import [org.apache.http.entity.mime MultipartEntity]
            org.apache.http.entity.mime.content.StringBody
            org.apache.http.entity.mime.content.FileBody
            org.apache.http.entity.ContentType
@@ -21,14 +21,14 @@
 (defmulti add-part
   (fn [multipartentity key value] (type value)))
 
-(defmethod add-part File [m k ^File f]
+(defmethod add-part File [^MultipartEntity m k ^File f]
   (.addPart m
             (ensure-string k)
-            (FileBody. f (ContentType/create 
+            (FileBody. f (ContentType/create
                            (.getContentType (FileTypeMap/getDefaultFileTypeMap) f))
                        (.getName f))))
 
-(defmethod add-part :default [m k v]
+(defmethod add-part :default [^MultipartEntity m k v]
   (.addPart m
             (ensure-string k)
             (StringBody. (str v) (Charset/forName "UTF-8"))))

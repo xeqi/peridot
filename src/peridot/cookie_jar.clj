@@ -10,7 +10,7 @@
             [ring.util.response :as rur]))
 
 (def cookie-date-formats
-  (map #(SimpleDateFormat. % Locale/US)
+  (map #(SimpleDateFormat. ^String % Locale/US)
        ["EEE, dd MMM yyyy HH:mm:ss z"
         "EEEE, dd-MMM-yy HH:mm:ss z"]))
 
