@@ -1,4 +1,5 @@
 language: clojure
+install: lein all deps
 script: lein all test
 # TODO: update matrix once https://github.com/travis-ci/travis-ci/issues/9368 is fixed
 matrix:
