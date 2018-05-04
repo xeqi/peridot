@@ -1,13 +1,13 @@
 (ns peridot.multipart
-  (:require [ring.util.codec :as codec])
+  (:require [ring.util.codec :as codec]
+            [ring.util.mime-type :as mime-type])
   (:import [org.apache.http.entity.mime MultipartEntity]
            org.apache.http.entity.mime.content.StringBody
            org.apache.http.entity.mime.content.FileBody
            org.apache.http.entity.ContentType
            java.io.ByteArrayOutputStream
            java.io.File
-           java.nio.charset.Charset
-           javax.activation.FileTypeMap))
+           java.nio.charset.Charset))
 
 (defn multipart? [params]
   (some #(instance? File %) (vals params)))
@@ -25,7 +25,7 @@
   (.addPart m
             (ensure-string k)
             (FileBody. f (ContentType/create
-                           (.getContentType (FileTypeMap/getDefaultFileTypeMap) f))
+                           (mime-type/ext-mime-type (.getName f)))
                        (.getName f))))
 
 (defmethod add-part :default [^MultipartEntity m k v]

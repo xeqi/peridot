@@ -9,10 +9,11 @@
 (def expected-content-type
   (let [[a b] (map #(Integer. %)
                    (clojure.string/split (System/getProperty "java.specification.version") #"\."))]
-    (if (and (<= 1 a)
-             (<= 8 b))
-      "text/plain" ; Java 1.8 and above
-      "application/octet-stream"))) ; Java 1.7 and below
+    (if (or (<= a 9)                                        ;; Java 9 and above
+            (and (<= 1 a)
+                 (<= 8 b)))
+      "text/plain"                                          ; Java 1.8 and above
+      "application/octet-stream")))                         ; Java 1.7 and below
 
 (deftest file-as-param-is-multipart
   (is (multipart/multipart? {"file" (io/file (io/resource "file.txt"))}))
@@ -22,7 +23,7 @@
   (-> (fn [req]
         (-> (response/response "ok")
             (assoc :multipart-params
-              (:multipart-params req))))
+                   (:multipart-params req))))
       (multiparams/wrap-multipart-params)))
 
 (deftest uploading-a-file
@@ -58,7 +59,7 @@
         res (-> (session ok-with-multipart-params)
                 (request "/"
                          :request-method :post
-                         :params {"file" file
+                         :params {"file"      file
                                   "something" "☃"})
                 :response)]
     (let [{:keys [size filename content-type tempfile]}
