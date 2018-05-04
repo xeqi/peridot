@@ -1,3 +1,9 @@
+## 0.5.1 / 2018-05-04
+
+* Add support for Java 9
+* Create MultipartEntity with an InputStream body instead of a string [#44](https://github.com/xeqi/peridot/issues/44)
+* Fix reflection warnings
+
 ## 0.5.0 / 2017-09-23
 
 * Search headers case insensitively. [#40](https://github.com/xeqi/peridot/pull/40)
