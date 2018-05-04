@@ -1,6 +1,7 @@
 (ns peridot.multipart
   (:require [ring.util.codec :as codec]
-            [ring.util.mime-type :as mime-type])
+            [ring.util.mime-type :as mime-type]
+            [clojure.java.io :as io])
   (:import [org.apache.http.entity.mime MultipartEntity]
            org.apache.http.entity.mime.content.StringBody
            org.apache.http.entity.mime.content.FileBody
@@ -41,13 +42,13 @@
 
 (defn build [params]
   (let [^MultipartEntity mpe (entity params)]
-     {:body (let [out (ByteArrayOutputStream.)]
-                        (.writeTo mpe out)
-                        (.close out)
-                        (.toString out))
+    {:body           (let [out (ByteArrayOutputStream.)]
+                       (.writeTo mpe out)
+                       (.close out)
+                       (io/input-stream (.toByteArray out)))
 
      :content-length (.getContentLength mpe)
-     :content-type (.getValue (.getContentType mpe))
-     :headers {"content-type"  (.getValue (.getContentType mpe))
-               "content-length" (str (.getContentLength mpe))}}))
+     :content-type   (.getValue (.getContentType mpe))
+     :headers        {"content-type"   (.getValue (.getContentType mpe))
+                      "content-length" (str (.getContentLength mpe))}}))
 
