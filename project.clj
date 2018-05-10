@@ -6,7 +6,7 @@
             :url  "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [;;Use clojure 1.3 for pom generation
                  [org.clojure/clojure "1.5.1"]
-                 [ring-mock "0.1.5"]
+                 [ring/ring-mock "0.3.2"]
                  [org.clojure/data.codec "0.1.0"]
                  [org.apache.httpcomponents/httpmime "4.5.1"
                   :exclusions [commons-logging]]
