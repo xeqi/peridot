@@ -1,18 +1,8 @@
 language: clojure
 install: lein all deps
 script: lein all test
-# TODO: update matrix once https://github.com/travis-ci/travis-ci/issues/9368 is fixed
-matrix:
-  include:
-# 8
-    - jdk: oraclejdk8
-    - jdk: openjdk8
-# 9
-    - jdk: oraclejdk9
-#    - jdk: openjdk9
-## 10
-#    - jdk: oraclejdk10
-#    - jdk: openjdk10
-## 11
-#    - jdk: oraclejdk11
-#    - jdk: openjdk11
+jdk:
+- oraclejdk8
+- oraclejdk9
+- oraclejdk10
+- oraclejdk11
