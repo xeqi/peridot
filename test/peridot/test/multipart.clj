@@ -9,7 +9,7 @@
 (def expected-content-type
   (let [[a b] (map #(Integer. %)
                    (clojure.string/split (System/getProperty "java.specification.version") #"\."))]
-    (if (or (<= a 9)                                        ;; Java 9 and above
+    (if (or (<= 9 a)                                        ;; Java 9 and above
             (and (<= 1 a)
                  (<= 8 b)))
       "text/plain"                                          ; Java 1.8 and above
