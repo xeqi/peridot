@@ -1,10 +1,10 @@
 (ns peridot.test.multipart
-  (:use [peridot.core]
-        [clojure.test])
-  (:require [peridot.multipart :as multipart]
+  (:require [clojure.java.io :as io]
+            [clojure.test :refer :all]
+            [peridot.core :refer [session request]]
+            [peridot.multipart :as multipart]
             [ring.middleware.multipart-params :as multiparams]
-            [ring.util.response :as response]
-            [clojure.java.io :as io]))
+            [ring.util.response :as response]))
 
 (def expected-content-type
   (let [[a b] (map #(Integer. %)

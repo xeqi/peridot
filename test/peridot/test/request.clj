@@ -1,7 +1,7 @@
 (ns peridot.test.request
-  (:use [peridot.request]
-        [clojure.test])
-  (:require [ring.mock.request :as mock]))
+  (:require [clojure.test :refer :all]
+            [peridot.request :refer [url]]
+            [ring.mock.request :as mock]))
 
 (deftest url-generation
   (testing "it should construct a URI from a ring reqeust"

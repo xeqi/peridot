@@ -1,7 +1,7 @@
 (ns peridot.test.core
-  (:use [peridot.core]
-        [clojure.test])
-  (:require [net.cgrand.moustache :as moustache]
+  (:require [clojure.test :refer :all]
+            [net.cgrand.moustache :as moustache]
+            [peridot.core :refer [session request header authorize follow-redirect content-type]]
             [ring.util.response :as response]))
 
 (def app

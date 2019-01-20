@@ -1,13 +1,10 @@
 (ns peridot.cookie-jar
-  (:import java.text.SimpleDateFormat
-           java.text.ParseException
-           java.lang.RuntimeException
-           (java.text DateFormat)
-           (java.util Date Locale))
-  (:require [clojure.string :as string]
-            [clj-time.core :as t]
+  (:require [clj-time.core :as t]
             [clj-time.format :as tf]
-            [ring.util.response :as rur]))
+            [clojure.string :as string]
+            [ring.util.response :as rur])
+  (:import (java.text SimpleDateFormat ParseException DateFormat)
+           (java.util Date Locale)))
 
 (def cookie-date-formats
   (map #(SimpleDateFormat. ^String % Locale/US)
@@ -27,7 +24,7 @@
         cookie-date-formats)
       (throw (RuntimeException. (format "Failed to parse date: %s" date)))))
 
-(defn ^:private dash-match [[ _ g1 g2]]
+(defn ^:private dash-match [[_ g1 g2]]
   (str g1 "-" g2))
 
 (defn ^:private dasherize [k]
@@ -56,7 +53,7 @@
             (parse-map options))]))
 
 (defn ^:private set-cookie [cookie-jar [k v]]
-  (assoc cookie-jar  k v))
+  (assoc cookie-jar k v))
 
 (defn merge-cookies [headers cookie-jar uri host]
   (let [cookie-string (rur/get-header {:headers headers} "Set-Cookie")]

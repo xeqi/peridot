@@ -1,11 +1,11 @@
 (ns peridot.request
-  (:require [peridot.multipart :as multipart]
-            [peridot.cookie-jar :as cj]
+  (:require [clojure.java.io :as io]
             [clojure.string :as string]
-            [clojure.java.io :as io]
+            [peridot.cookie-jar :as cj]
+            [peridot.multipart :as multipart]
             [ring.mock.request :as mock]
             [ring.util.response :as rur])
-  (:import java.io.ByteArrayInputStream))
+  (:import (java.io ByteArrayInputStream)))
 
 (defmulti to-input-stream class)
 

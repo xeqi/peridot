@@ -1,7 +1,7 @@
 (ns peridot.core
-  (:require [peridot.request :as pr]
+  (:require [clojure.data.codec.base64 :as base64]
             [peridot.cookie-jar :as pcj]
-            [clojure.data.codec.base64 :as base64]
+            [peridot.request :as pr]
             [ring.util.response :as rur]))
 
 (defn session

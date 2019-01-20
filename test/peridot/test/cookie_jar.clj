@@ -1,17 +1,17 @@
 (ns peridot.test.cookie-jar
-  (:import (java.text DateFormat)
-           (java.util Date Locale))
-  (:use [peridot.core]
-        [clojure.test])
-  (:require [clojure.string :as str]
-            [peridot.cookie-jar :as cj]
+  (:require [clj-time.core :as t]
+            [clj-time.format :as tf]
+            [clojure.test :refer :all]
+            [clojure.string :as str]
             [net.cgrand.moustache :as moustache]
+            [peridot.core :refer [session request]]
+            [peridot.cookie-jar :as cj]
             [ring.util.response :as response]
             [ring.util.codec :as codec]
             [ring.middleware.params :as params]
-            [ring.middleware.cookies :as cookies]
-            [clj-time.core :as t]
-            [clj-time.format :as tf]))
+            [ring.middleware.cookies :as cookies])
+  (:import (java.text DateFormat)
+           (java.util Date Locale)))
 
 (defn cookies-from-map [m f]
   (apply merge

@@ -1,14 +1,12 @@
 (ns peridot.multipart
-  (:require [ring.util.codec :as codec]
-            [ring.util.mime-type :as mime-type]
-            [clojure.java.io :as io])
-  (:import [org.apache.http.entity.mime MultipartEntity]
-           org.apache.http.entity.mime.content.StringBody
-           org.apache.http.entity.mime.content.FileBody
-           org.apache.http.entity.ContentType
-           java.io.ByteArrayOutputStream
-           java.io.File
-           java.nio.charset.Charset))
+  (:require [clojure.java.io :as io]
+            [ring.util.codec :as codec]
+            [ring.util.mime-type :as mime-type])
+  (:import (java.io ByteArrayOutputStream File)
+           (java.nio.charset Charset)
+           (org.apache.http.entity ContentType)
+           (org.apache.http.entity.mime MultipartEntity)
+           (org.apache.http.entity.mime.content StringBody FileBody)))
 
 (defn multipart? [params]
   (some #(instance? File %) (vals params)))
