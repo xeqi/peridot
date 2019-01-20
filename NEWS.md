@@ -1,3 +1,7 @@
+## Unreleased
+
+* Removed unused dependency on clj-time.
+
 ## 0.5.1 / 2018-05-04
 
 * Add support for Java 9

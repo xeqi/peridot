@@ -10,8 +10,7 @@
                  [org.clojure/data.codec "0.1.0"]
                  [org.apache.httpcomponents/httpmime "4.5.1"
                   :exclusions [commons-logging]]
-                 [org.apache.httpcomponents/httpcore "4.4.5"]
-                 [clj-time "0.12.0"]]
+                 [org.apache.httpcomponents/httpcore "4.4.5"]]
 
   :release-tasks [["vcs" "assert-committed"]
                   ["change" "version" "leiningen.release/bump-version" "release"]
@@ -24,8 +23,9 @@
 
   :profiles {:dev {:dependencies   [[net.cgrand/moustache "1.1.0"
                                      :exclusions
-                                     [[org.clojure/clojure]
-                                      [ring/ring-core]]]
+                                     [org.clojure/clojure
+                                      ring/ring-core]]
+                                    [clj-time "0.12.0"]
                                     [ring/ring-core "1.5.0"]
                                     [javax.servlet/servlet-api "2.5"]
                                     ;; use 1.8 for development

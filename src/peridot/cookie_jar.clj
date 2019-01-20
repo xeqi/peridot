@@ -1,7 +1,5 @@
 (ns peridot.cookie-jar
-  (:require [clj-time.core :as t]
-            [clj-time.format :as tf]
-            [clojure.string :as string]
+  (:require [clojure.string :as string]
             [ring.util.response :as rur])
   (:import (java.text SimpleDateFormat ParseException DateFormat)
            (java.util Date Locale)))
