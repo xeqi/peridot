@@ -1,6 +1,7 @@
 ## Unreleased
 
 * Removed unused dependency on clj-time.
+* Replace ring-mock with ring/ring-mock
 
 ## 0.5.1 / 2018-05-04
 
