@@ -13,8 +13,19 @@
 (defmethod to-input-stream String [^String s] (ByteArrayInputStream. (.getBytes s)))
 (defmethod to-input-stream :default [x] (io/input-stream x))
 
-(defn get-host [request]
-  (string/lower-case (rur/get-header request "host")))
+(defn get-host
+  "Gets hostname of the request.
+  Note that this is different from the Host header which can include a port."
+  ;; Domain names are case insensitive - https://datatracker.ietf.org/doc/html/rfc4343
+  ;; Domain names are not quite the same as the hostname, but should be good enough
+  ;; for our purposes.
+  [request]
+  (let [host (string/lower-case (rur/get-header request "Host"))]
+    ;; Split port from host, handling IPv6 addresses
+    (if (not (empty? host))
+      (let [host (string/split host #":[0-9]+$")]
+        (first host))
+      (throw (Exception. "No host in request")))))
 
 (defn set-post-content-type [request]
   (if (and (not (:content-type request))

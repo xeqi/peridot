@@ -53,8 +53,13 @@
 (defn ^:private set-cookie [cookie-jar [k v]]
   (assoc cookie-jar k v))
 
-(defn merge-cookies [headers cookie-jar uri host]
-  (let [cookie-string (rur/get-header {:headers headers} "Set-Cookie")]
+(defn merge-cookies
+  "Called when updating the session with the response"
+  ;; response-headers come from response
+  ;; cookie-jar comes from session
+  ;; uri and host come from request
+  [response-headers cookie-jar uri host]
+  (let [cookie-string (rur/get-header {:headers response-headers} "Set-Cookie")]
     (if (empty? cookie-string)
       cookie-jar
       (update-in cookie-jar [host] merge
