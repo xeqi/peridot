@@ -9,7 +9,8 @@
             [ring.util.response :as response]
             [ring.util.codec :as codec]
             [ring.middleware.params :as params]
-            [ring.middleware.cookies :as cookies])
+            [ring.middleware.cookies :as cookies]
+            [ring.util.response :as rur])
   (:import (java.text DateFormat)
            (java.util Date Locale)))
 
@@ -166,6 +167,38 @@
         (#(is (= (get (:headers (:request %)) "cookie")
                  "value=3")
               "cookies ordering does not matter for specificity")))))
+
+(deftest cookies-on-different-ports
+  (-> (session app)
+      (request "http://www.example.com/set" :params {"value" "1"})
+      (request "http://www.example.com/show")
+      (doto
+        (#(is (= (rur/get-header (:request %) "cookie")
+                 "value=1"))))
+      (request "http://www.example.com:80/set" :params {"value" "2"})
+      (doto
+        (#(is (= (rur/get-header (:request %) "cookie")
+                 "value=1")))
+        (#(is (= (rur/get-header (:response %) "Set-Cookie")
+                 '("value=2")))))
+      (request "http://www.example.com:8080/set" :params {"value" "3"})
+      (doto
+        (#(is (= (rur/get-header (:request %) "cookie")
+                 "value=2")))
+        (#(is (= (rur/get-header (:response %) "Set-Cookie")
+                 '("value=3")))))
+      (request "https://www.example.com:443/set" :params {"value" "4"})
+      (doto
+        (#(is (= (rur/get-header (:request %) "cookie")
+                 "value=3")))
+        (#(is (= (rur/get-header (:response %) "Set-Cookie")
+                 '("value=4")))))
+      (request "https://www.example.com:4443/set" :params {"value" "5"})
+      (doto
+        (#(is (= (rur/get-header (:request %) "cookie")
+                 "value=4")))
+        (#(is (= (rur/get-header (:response %) "Set-Cookie")
+                 '("value=5")))))))
 
 (deftest cookie-expires
   (let [hour-ago (t/from-now (t/hours -1))
