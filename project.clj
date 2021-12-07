@@ -21,6 +21,9 @@
                   ["vcs" "commit"]
                   ["vcs" "push"]]
 
+  :deploy-repositories [["releases"  {:sign-releases false :url "https://repo.clojars.org"}]
+                        ["snapshots" {:sign-releases false :url "https://repo.clojars.org"}]]
+
   :profiles {:dev {:dependencies   [[net.cgrand/moustache "1.1.0"
                                      :exclusions
                                      [org.clojure/clojure
