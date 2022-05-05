@@ -2,6 +2,8 @@
 
 peridot is an interaction library for [ring](https://github.com/ring-clojure/ring) apps. Its functionality is based on an partial port of [Rack::Test](https://github.com/brynary/rack-test)'s test suite.
 
+See also [kerodon](https://github.com/xeqi/kerodon) for user interaction testing of Ring apps.
+
 ## Dependency Information
 
 [![Clojars Project](http://clojars.org/peridot/latest-version.svg)](http://clojars.org/peridot)
