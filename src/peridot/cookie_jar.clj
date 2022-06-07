@@ -31,12 +31,15 @@
       (string/replace #"([a-z\d])([A-Z])" dash-match)
       (string/lower-case)))
 
+(defn ^:private str->dashed-keyword [k]
+  (keyword (dasherize k)))
+
 (defn ^:private parse-map
   ([map-string] (parse-map map-string #"; *"))
   ([map-string regex]
      (when map-string
        (apply merge (map #(let [[k v] (string/split % #"=" 2)]
-                            {(keyword (dasherize k)) (or v true)})
+                            {(str->dashed-keyword k) (or v true)})
                          (string/split map-string regex))))))
 
 (defn ^:private build-cookie [cookie-string uri host]
@@ -44,11 +47,14 @@
                              [cookie-string nil])
         [k v] (string/split assign #"=" 2)]
     [(string/lower-case k)
-     (merge {:value v}
-            {:path (re-find #".*\/" uri)}
-            {:domain host}
-            {:raw assign}
-            (parse-map options))]))
+     (-> (merge {:value v}
+                {:path (re-find #".*\/" uri)}
+                {:domain host}
+                {:raw assign}
+                (parse-map options))
+         (update :same-site (fn [s]
+                              (or (and s (str->dashed-keyword s))
+                                  :lax))))]))
 
 (defn ^:private set-cookie [cookie-jar [k v]]
   (assoc cookie-jar k v))

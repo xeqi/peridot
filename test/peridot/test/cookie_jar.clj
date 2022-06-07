@@ -293,8 +293,8 @@
            :request-method :post
            :params {:cookies (pr-str {"a" (merge {:value "b",
                                                   :path "/",
-                                                  ;; :lax is default
-                                                  :same-site :lax}
+                                                  ;; :same-site :lax is default
+                                                  }
                                                  cookie)})}))
 
 (defn cross-site-request [a b & [cookie]]
