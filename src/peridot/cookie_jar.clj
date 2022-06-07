@@ -71,7 +71,7 @@
       (update-in cookie-jar [host] merge
                  (into {} (map #(build-cookie % uri host) cookie-string))))))
 
-(defn cookies-for [cookie-jar scheme uri host]
+(defn cookies-for [cookie-jar scheme uri host same-site?]
   (let [cookie-string
         (->> cookie-jar
              (remove (fn [[domain _]]
@@ -89,6 +89,8 @@
                                     uri)))
              (remove #(and (:secure %) (= scheme :http)))
              (remove #(and (not (:secure %)) (= (:same-site %) :none)))
+             (remove #(when-not same-site?
+                        (= (:same-site %) :strict)))
              (map :raw)
              (interpose ";")
              (apply str))]
