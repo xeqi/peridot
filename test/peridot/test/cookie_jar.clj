@@ -349,7 +349,7 @@
   (-> (cross-site-request
        "https://host-a.com"
        "https://host-b.com"
-       {:same-site :strict
+       {:same-site :none
         :secure true})
 
       (cookie-has-been-sent)))
