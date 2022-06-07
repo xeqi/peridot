@@ -88,6 +88,7 @@
                                                      (:path %)))
                                     uri)))
              (remove #(and (:secure %) (= scheme :http)))
+             (remove #(and (not (:secure %)) (= (:same-site %) :none)))
              (map :raw)
              (interpose ";")
              (apply str))]
