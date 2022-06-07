@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+set -eo pipefail
+
+echo "Testing against multiple clojure versions"
+lein all test
