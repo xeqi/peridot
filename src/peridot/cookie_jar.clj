@@ -52,9 +52,9 @@
                 {:domain host}
                 {:raw assign}
                 (parse-map options))
-         (update :same-site (fn [s]
-                              (or (and s (str->dashed-keyword s))
-                                  :lax))))]))
+         (update-in [:same-site] (fn [s]
+                                   (or (and s (str->dashed-keyword s))
+                                       :lax))))]))
 
 (defn ^:private set-cookie [cookie-jar [k v]]
   (assoc cookie-jar k v))
