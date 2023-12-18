@@ -4,8 +4,9 @@
             [ring.util.mime-type :as mime-type])
   (:import (java.io ByteArrayOutputStream File)
            (java.nio.charset Charset)
+           (org.apache.http HttpEntity)
            (org.apache.http.entity ContentType)
-           (org.apache.http.entity.mime MultipartEntity)
+           (org.apache.http.entity.mime MultipartEntityBuilder)
            (org.apache.http.entity.mime.content StringBody FileBody)))
 
 (defn multipart? [params]
@@ -20,26 +21,27 @@
 (defmulti add-part
   (fn [multipartentity key value] (type value)))
 
-(defmethod add-part File [^MultipartEntity m k ^File f]
+(defmethod add-part File [^MultipartEntityBuilder m k ^File f]
   (.addPart m
             (ensure-string k)
             (FileBody. f (ContentType/create
                            (mime-type/ext-mime-type (.getName f)))
                        (.getName f))))
 
-(defmethod add-part :default [^MultipartEntity m k v]
+(defmethod add-part :default [^MultipartEntityBuilder m k v]
   (.addPart m
             (ensure-string k)
             (StringBody. (str v) (Charset/forName "UTF-8"))))
 
 (defn entity [params]
-  (let [mpe (MultipartEntity.)]
+  (let [b (doto (MultipartEntityBuilder/create)
+            (.setCharset (Charset/forName "UTF-8")))]
     (doseq [p params]
-      (apply add-part mpe p))
-    mpe))
+      (apply add-part b p))
+    (.build b)))
 
 (defn build [params]
-  (let [^MultipartEntity mpe (entity params)]
+  (let [^HttpEntity mpe (entity params)]
     {:body           (let [out (ByteArrayOutputStream.)]
                        (.writeTo mpe out)
                        (.close out)
