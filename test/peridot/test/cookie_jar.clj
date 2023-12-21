@@ -1,10 +1,11 @@
 (ns peridot.test.cookie-jar
   (:require [clj-time.core :as t]
             [clj-time.format :as tf]
+            [clojure.edn]
             [clojure.test :refer :all]
             [clojure.string :as str]
             [net.cgrand.moustache :as moustache]
-            [peridot.core :refer [session request]]
+            [peridot.core :refer [session request follow-redirect]]
             [peridot.cookie-jar :as cj]
             [ring.util.response :as response]
             [ring.util.codec :as codec]
@@ -70,6 +71,13 @@
                   :cookies
                   (cookies-from-map (:params req)
                                     (constantly {:http-only true}))))}
+        ["echo"]
+        {:post (fn [{:keys [params] :as req}]
+                 (let [cookies (some-> params (get "cookies") clojure.edn/read-string)
+                    headers (some-> params (get "headers") clojure.edn/read-string)]
+                   (cond-> (response/response "ok")
+                     cookies (assoc :cookies cookies)
+                     headers (assoc :headers headers))))}
         ["default-path"]
         {:get (fn [req]
                 (let [resp (response/response "ok")]
@@ -278,3 +286,70 @@
         (#(is (= (get (:headers (:request %)) "cookie")
                  "value=1")
               "http-only cookies are sent")))))
+
+(defn set-cookie [app host cookie]
+  (request app
+           (str host "/echo")
+           :request-method :post
+           :params {:cookies (pr-str {"a" (merge {:value "b",
+                                                  :path "/",
+                                                  ;; :same-site :lax is default
+                                                  }
+                                                 cookie)})}))
+
+(defn cross-site-request [a b & [cookie]]
+  (-> (session app)
+      (set-cookie a cookie)
+      ;; Redirect back from B to A
+      (request (str b "/echo")
+               :request-method :post
+               :params {:headers (pr-str {"Location" (str a "/cookies/get")})})
+      (follow-redirect)))
+
+(defn cookie-has-been-sent [app]
+  (doto app
+    (#(is (= (get (:headers (:request %)) "cookie")
+             "a=b")
+          "cookie has been sent"))))
+
+(defn cookie-has-not-been-sent [app]
+  (doto app
+    (#(is (not= (get (:headers (:request %)) "cookie")
+                "a=b")
+          "cookie has not been sent"))))
+
+(deftest cookie-security-same-site
+  ;; - cookies are sent cross domain (and cross protocol) for :same-site :lax (default)
+  (-> (cross-site-request
+       "http://host-a.com"
+       "http://host-b.com")
+      (cookie-has-been-sent))
+
+  ;; - cookies should not be sent cross-domain for :same-site :strict
+  (-> (cross-site-request
+       "http://host-a.com"
+       "http://host-b.com"
+       {:same-site :strict})
+
+      (cookie-has-not-been-sent)
+
+      ;; On a subsequent normal request cookies are sent again
+      (request "http://host-a.com/cookies/get")
+      (cookie-has-been-sent))
+
+  ;; Not sure about this one (also not supported in all browsers, see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite)
+  ;; - cookies should not be send for :same-site :none without :secure true
+  (-> (session app)
+      (set-cookie "https://host-a.com" {:same-site :none})
+
+      (request "https://host-a.com/cookies/get")
+      (cookie-has-not-been-sent))
+
+  ;; - cookies are sent cross domain for :same-site :none and :secure true
+  (-> (cross-site-request
+       "https://host-a.com"
+       "https://host-b.com"
+       {:same-site :none
+        :secure true})
+
+      (cookie-has-been-sent)))

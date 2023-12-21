@@ -51,11 +51,21 @@
     location
     (pr/url (assoc request :uri location :query-string nil))))
 
+;; Backward compatibility for clojure < 1.8 -> clojure.string/start-with?
+(def ^:private
+  string-starts-with?
+  (or (resolve 'clojure.string/starts-with?)
+      (fn [^CharSequence s ^String substr]
+        (.startsWith (.toString s) substr))))
+
 (defn follow-redirect
   "Follow the redirect from the previous response."
-  [state]
+  [{request-map :request :as state}]
   (if-let [location (rur/get-header (:response state) "Location")]
-    (request state
-             (expand-location location (:request state))
-             :headers {"referer" (pr/url (:request state))})
+    (let [prev-location (str (name (:scheme request-map)) "://" (:server-name request-map))
+          new-location (expand-location location request-map)
+          same-site? (string-starts-with? new-location prev-location)]
+      (request state new-location
+               :same-site? same-site?
+               :headers {"referer" (pr/url request-map)}))
     (throw (IllegalArgumentException. "Previous response was not a redirect"))))

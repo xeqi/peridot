@@ -29,7 +29,7 @@
                                      [org.clojure/clojure
                                       ring/ring-core]]
                                     [clj-time "0.12.0"]
-                                    [ring/ring-core "1.5.0"]
+                                    [ring/ring-core "1.9.5" :exclusions [ring/ring-codec commons-codec]]
                                     [javax.servlet/servlet-api "2.5"]
                                     ;; use 1.8 for development
                                     ^:replace [org.clojure/clojure "1.8.0"]]

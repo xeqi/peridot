@@ -69,7 +69,8 @@
                          (merge (cj/cookies-for cookie-jar
                                                 (:scheme request)
                                                 (:uri request)
-                                                (get-host request)))
+                                                (get-host request)
+                                                (not (false? (:same-site? env)))))
                          (merge (:headers env))))
         (set-content-type content-type)
         (add-env (dissoc (dissoc env :params) :headers))
